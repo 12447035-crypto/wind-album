@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <title>風のオムニバスアルバム</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.js"
+    integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+ </head>
+
+ <body>
+  <div id="wall">
+    <div id="cf-maketitle">思い出の風を、集めてみよう。</div>
+    <div id="cf-makesub">
+      気になった風を聴いて、5つ選びましょう。
+      <br> 集まった風は、あなただけのアルバムになります。
+    </div>
+
+    <!-- 3Dカバーフロー（全30風） -->
+    <div id="coverflow">
+      <div id="cf-label"></div>
+      <div id="cf-scene">
+        <div id="cf-stage">
+          <img src="img/北風.png" alt="北風" data-name="北風">
+          <img src="img/山風.png" alt="山風" data-name="山風">
+          <img src="img/海風.png" alt="海風" data-name="海風">
+          <img src="img/川風.png" alt="川風" data-name="川風">
+          <img src="img/潮風.png" alt="潮風" data-name="潮風">
+          <img src="img/向かい風.png" alt="向かい風" data-name="向かい風">
+          <img src="img/追い風.png" alt="追い風" data-name="追い風">
+          <img src="img/熱風.png" alt="熱風" data-name="熱風">
+          <img src="img/野風.png" alt="野風" data-name="野風">
+          <img src="img/清風.png" alt="清風" data-name="清風">
+          <img src="img/そよ風.png" alt="そよ風" data-name="そよ風">
+          <img src="img/biru.png" alt="ビル風" data-name="ビル風">
+          <img src="img/雨風.png" alt="雨風" data-name="雨風">
+          <img src="img/朝風.png" alt="朝風" data-name="朝風">
+          <img src="img/夕風.png" alt="夕風" data-name="夕風">
+          <img src="img/夜風.png" alt="夜風" data-name="夜風">
+          <img src="img/春風.png" alt="春風" data-name="春風">
+          <img src="img/花風.png" alt="花風" data-name="花風">
+          <img src="img/春一番.png" alt="春一番" data-name="春一番">
+          <img src="img/木の芽風.png" alt="木の芽風" data-name="木の芽風">
+          <img src="img/青嵐.png" alt="青嵐" data-name="青嵐">
+          <img src="img/若葉風.png" alt="若葉風" data-name="若葉風">
+          <img src="img/黒南風.png" alt="黒南風" data-name="黒南風">
+          <img src="img/涼風.png" alt="涼風" data-name="涼風">
+          <img src="img/初嵐.png" alt="初嵐" data-name="初嵐">
+          <img src="img/秋風.png" alt="秋風" data-name="秋風">
+          <img src="img/悲風.png" alt="悲風" data-name="悲風">
+          <img src="img/寒風.png" alt="寒風" data-name="寒風">
+          <img src="img/木枯らし.png" alt="木枯らし" data-name="木枯らし">
+          <img src="img/隙間風.png" alt="隙間風" data-name="隙間風">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 選択中の風：説明＋試聴＋追加（中央下にまとめて常設） ===== -->
+    <div id="cf-controls">
+      <div id="cf-now">
+        <div id="cf-detail-name">追い風。</div>
+        <div id="cf-detail-desc">後ろから吹いてくる風。</div>
+      </div>
+
+      <div id="cf-detail-player">
+        <!-- 試聴用の音声 -->
+        <audio id="cf-audio"></audio>
+        <button id="cf-play" aria-label="試聴">
+          <svg viewBox="0 0 56 56" width="56" height="56">
+            <circle cx="28" cy="28" r="26"></circle>
+            <polygon class="cf-play-icon" points="23,19 23,37 38,28"></polygon>
+            <g class="cf-pause-icon">
+              <rect x="22" y="19" width="4" height="18"></rect>
+              <rect x="30" y="19" width="4" height="18"></rect>
+            </g>
+          </svg>
+        </button>
+        <div id="cf-progress">
+          <div id="cf-progress-fill"></div>
+          <div id="cf-progress-knob"></div>
+        </div>
+      </div>
+
+      <button id="cf-add">add</button>
+
+      <div id="cf-slots"></div>
+      <button id="cf-confirm">このアルバムを完成させる</button>
+    </div>
+  </div>
+
+  <!-- ===== ロード画面 ===== -->
+  <div id="album-loading">
+    <div class="al-spinner"></div>
+    <div class="al-text">アルバムを作成しています…</div>
+  </div>
+
+  <!-- ===== 完成画面（CDプレイヤー筐体） ===== -->
+  <div id="album-screen">
+    <div id="as-deck">
+      <!-- 完成画面の再生用の音声 -->
+      <audio id="as-audio"></audio>
+
+      <!-- 左：CD -->
+      <div id="as-disc-wrap">
+        <div id="as-disc-rot">
+          <div id="as-disc-canvas"></div>
+        </div>
+        <input id="as-title" type="text" value="" size="8" placeholder="title。" title="クリックでタイトルを編集（停止中のみ）">
+        <div id="as-hole"></div>
+      </div>
+
+      <!-- 右：曲リストパネル -->
+      <div id="as-panel">
+        <!-- 再生中の曲＋説明 -->
+        <div id="as-nowcard">
+          <div id="as-now">
+            <div id="as-swatch"></div>
+            <div id="as-info">
+              <div id="as-name">そよ風</div>
+              <div id="as-num">トラック 1 / 5</div>
+            </div>
+          </div>
+          <div id="as-desc">—</div>
+        </div>
+        <!-- 選んだ曲リスト -->
+        <div id="as-tracklist"></div>
+      </div>
+
+      <!-- 下：プログレスバー -->
+      <div id="as-progwrap">
+        <div id="as-prog"><div id="as-fill"></div><div id="as-knob"></div></div>
+      </div>
+
+      <!-- 下：立体ボタン（曲の戻る/再生/次へ） -->
+      <div id="as-ctrl">
+        <div class="as-btn-wrap">
+          <button id="as-prev" aria-label="前の曲"></button>
+          <span class="as-btn-label">◀|</span>
+        </div>
+        <div class="as-btn-wrap">
+          <button id="as-play" aria-label="再生/一時停止"></button>
+          <span class="as-btn-label"><span class="ic-play">▶</span><span class="ic-pause">❚❚</span></span>
+        </div>
+        <div class="as-btn-wrap">
+          <button id="as-next" aria-label="次の曲"></button>
+          <span class="as-btn-label">|▶</span>
+        </div>
+      </div>
+
+       <!-- 音量ダイヤル -->
+       <div id="as-vol" title="ドラッグで音量調整">
+        <div id="as-vol-dial">
+          <div id="as-vol-mark"></div>
+        </div>
+        <div id="as-vol-label">VOL</div>
+      </div>
+
+      <!-- 画面送り：左=前の画面に戻る / 右=次の画面（QR完成）へ -->
+      <button id="as-screen-prev" aria-label="前の画面に戻る">
+        <svg viewBox="0 0 60 40" width="60" height="40">
+          <polyline points="34,8 18,20 34,32"></polyline>
+          <polyline points="48,8 32,20 48,32"></polyline>
+        </svg>
+      </button>
+      <button id="as-screen-next" aria-label="次の画面へ" disabled>
+        <svg viewBox="0 0 60 40" width="60" height="40">
+          <polyline points="12,8 28,20 12,32"></polyline>
+          <polyline points="26,8 42,20 26,32"></polyline>
+        </svg>
+      </button>
+
+      <span id="as-time">0:00 / 0:00</span>
+    </div>
+
+    <!-- QRオーバーレイ（次へ で枠の中央に被さる・アルバム完成） -->
+    <div id="as-qr-overlay">
+      <div id="as-qr-card">
+        <div id="as-qr-title">あなたのアルバムが完成しました</div>
+        <div id="as-qr"></div>
+        <div id="as-qr-sub">QRコードを読み取って<br>スマホに保存</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+ </body>
+
+</html>

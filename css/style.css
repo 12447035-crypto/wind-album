@@ -1,0 +1,1088 @@
+@import url('https://fonts.googleapis.com/css2?family=Crafty+Girls&family=IBM+Plex+Sans+JP:wght@300;400&family=Klee+One&family=Life+Savers:wght@400;700;800&family=Sacramento&family=Zen+Maru+Gothic&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "IBM Plex Sans JP", sans-serif;
+  letter-spacing: 0.54em !important;   /* Illustratorのトラッキング540相当・全文字統一 */
+  line-height: 1.6;         /* 基本の行間（1行ものはこれで自然に） */
+}
+
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+#wrapper {
+  position: relative;
+  width: 100%;
+  height: 150vh;
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+#haikei {
+  display: block;
+  width: 100%;
+  height: 150vh;
+  object-fit: cover;
+}
+
+#canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+}
+
+#canvas-container canvas {
+  display: block;
+}
+
+.title {
+  font-size: 56px;
+  font-weight: lighter;
+  color: #fff;
+}
+
+#logo {
+  width: 820px;       /* ロゴの幅。大きく/小さくしたいときはこの数字 */
+  height: auto;
+  display: block;
+  margin: 0 auto;     /* 中央寄せ */
+}
+
+#text {
+  position: absolute;
+  top: 42%;
+  left: 51%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+}
+
+#wall {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-image: url('../img/wall.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: repeat-y;
+}
+
+/* ===== 見出し ===== */
+#cf-maketitle {
+  text-align: center;
+  padding-top: 100px;
+  font-size: 17.5px;
+  color: #000;
+  margin: 0 0 24px;
+  line-height: 2.2;
+}
+
+#cf-makesub {
+  text-align: center;
+  font-size: 12.5px;
+  color: #888;
+  margin-top: 20px;
+  line-height: 2;
+}
+
+/* ===== カバーフロー ===== */
+#coverflow {
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+#cf-scene {
+  width: 100%;
+  height: 100%;
+  perspective: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cf-stage {
+  position: relative;
+  transform-style: preserve-3d;
+  width: 0;
+  height: 0;
+}
+
+#cf-stage img {
+  position: absolute;
+  width: 190px;
+  height: 360px;
+  margin: -180px 0 0 -95px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  /* transformはJSが毎フレーム補間するのでCSSトランジションは掛けない
+     （二重イージングでSafariが特に遅く・カクつくのを防ぐ） */
+  transition: opacity 0.4s ease, filter 0.3s ease;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: transparent;
+  will-change: transform, opacity;
+}
+
+#cf-stage img:hover {
+  filter: brightness(0.8);
+}
+
+/* 正面（中央）のカードはホバーしても暗くしない */
+#cf-stage img.is-center:hover {
+  filter: none;
+}
+
+#cf-label {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  font-size: 12.5px;
+  color: #444;
+  line-height: 1.6;
+  z-index: 99;
+  display: none;
+}
+
+#cf-label span {
+  color: #aaa;
+  font-size: 9.1px;
+}
+
+/* ===== コントロール群（カードの下に中央寄せでまとめる） ===== */
+#cf-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+  margin-top: 0;
+  padding-bottom: 100px;
+  position: relative;
+  z-index: 50;
+}
+
+/* 選択中の風：名前＋説明 */
+#cf-now {
+  text-align: center;
+}
+
+#cf-detail-name {
+  font-size: 18.2px;
+  color: #3a4250;
+  letter-spacing: 0.08em;
+  /* 末尾の「。」のぶん中心が左にずれるので、その幅だけ右へ寄せる */
+  padding-left: 1.08em;
+}
+
+#cf-detail-desc {
+  font-size: 13px;
+  color: #6a7280;
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+  /* 末尾の「。」のぶん中心が左にずれるので、その幅だけ右へ寄せる */
+  padding-left: 1.04em;
+}
+
+/* 試聴プレイヤー */
+#cf-detail-player {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 560px;
+  max-width: 88vw;
+  margin-top: -18px;
+}
+
+/* 試聴の再生ボタン：ニューモーフィズム化 */
+#cf-play {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+#cf-play svg {
+  width: 52px;
+  height: 52px;
+}
+
+#cf-play svg circle {
+  fill: none;
+  stroke: #5a6472;
+  stroke-width: 1.4;
+  transition: stroke 0.2s ease;
+}
+
+#cf-play svg .cf-play-icon {
+  fill: #5a6472;
+  transition: fill 0.2s ease;
+}
+
+#cf-play svg .cf-pause-icon {
+  display: none;
+}
+
+#cf-play svg .cf-pause-icon rect {
+  fill: #5a6472;
+}
+
+#cf-play:hover svg circle {
+  stroke: #2a8ad0;
+}
+
+#cf-play:hover svg .cf-play-icon {
+  fill: #2a8ad0;
+}
+
+#cf-play.playing svg .cf-play-icon {
+  display: none;
+}
+
+#cf-play.playing svg .cf-pause-icon {
+  display: block;
+}
+
+#cf-progress {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  background: #c8d0d8;
+  border-radius: 2px;
+}
+
+#cf-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: #7fc4d6;
+  border-radius: 2px;
+}
+
+#cf-progress-knob {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #3a4250;
+  transform: translate(-50%, -50%);
+}
+
+/* add to album を「ボタン」としてはっきり見せる */
+#cf-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  margin-top: 6px;
+  padding: 10px 28px;
+  border: 1px solid #5a6472;
+  border-radius: 26px;
+  background: none;
+  color: #5a6472;
+  font-size: 12.6px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+#cf-add:hover {
+  color: #2a8ad0;
+  border-color: #2a8ad0;
+}
+
+/* 追加済みの状態（色で分かるように） */
+#cf-add.added {
+  color: #2a8ad0;
+  border-color: #2a8ad0;
+}
+
+/* 5つ埋まって押せないとき */
+#cf-add:disabled {
+  color: #b6bcc4;
+  border-color: #d2d6dc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#cf-hint {
+  font-size: 9.1px;
+  color: #888;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 18px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  margin-top: 10px;
+}
+
+#cf-slots {
+  display: flex;
+  gap: 8px;
+}
+
+#cf-slots .slot {
+  width: 54px;
+  height: 64px;
+  border-radius: 8px;
+  border: 1.5px dashed rgba(120, 120, 120, 0.5);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cf-slots .slot.filled {
+  border-style: solid;
+  border-color: #2a8ad0;
+}
+
+#cf-slots .slot .num {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  font-size: 7px;
+  color: #888;
+  z-index: 2;
+}
+
+#cf-slots .slot .thumb {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+#cf-slots .slot .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#cf-slots .slot .nm {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 6.3px;
+  color: #fff;
+  text-align: center;
+  padding: 2px 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+#cf-slots .slot .rm {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  font-size: 7.7px;
+  line-height: 15px;
+  text-align: center;
+  letter-spacing: 0 !important;   /* 全体の字間0.54emで×が左に寄るのを打ち消す */
+  cursor: pointer;
+  z-index: 3;
+}
+
+#cf-confirm {
+  display: none;
+  font-size: 9.8px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  border: none;
+  background: #185fa5;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(24, 95, 165, 0.3);
+  transition: background 0.15s;
+}
+
+#cf-confirm.show {
+  display: block;
+}
+
+#cf-confirm:hover {
+  background: #134d87;
+}
+
+/* ===== ロード画面 ===== */
+#album-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: #f2f1ee;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+#album-loading.show {
+  display: flex;
+}
+
+.al-spinner {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid #d8d8d2;
+  border-top-color: #6a7280;
+  animation: alspin 0.9s linear infinite;
+}
+
+@keyframes alspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.al-text {
+  font-size: 9.8px;
+  color: #888;
+  letter-spacing: 0.1em;
+}
+
+/* ===== 完成画面：CDプレイヤー筐体 ===== */
+#album-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  background-image: url('../img/wall.png');
+  background-size: cover;
+  background-position: center;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+#album-screen.show {
+  display: flex;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* グレーの筐体（ニュートラルなニューモーフィズム背景） */
+#as-deck {
+  position: relative;
+  width: 920px;
+  max-width: 80vw;
+  aspect-ratio: 1080 / 760;
+  max-height: 82vh;
+  background: linear-gradient(145deg, #eef0ef 0%, #e8eae9 60%, #dee0df 100%);
+  border-radius: 48px;
+  box-shadow: 0 30px 50px rgba(170, 175, 180, 0.4),
+    inset 2px 2px 6px rgba(255, 255, 255, 0.8),
+    inset -2px -2px 8px rgba(180, 185, 190, 0.4);
+  padding: 4%;
+}
+
+/* 左：CD（外側に明るいにじみで埋め込む） */
+#as-disc-wrap {
+  position: absolute;
+  left: 4%;
+  top: 42%;
+  transform: translateY(-54%);
+  width: 46%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background: #fff;
+  padding: 0.5px;
+  box-shadow:
+    0 0 10px 5px rgba(189, 188, 188, 0.5),   /* 内側：白に近い明るいにじみ */
+    0 0 60px 30px rgba(238, 240, 239, 0.7),   /* 外側：筐体色へ広がるにじみ */
+    0 0 100px 50px rgba(232, 234, 233, 0.5);  /* さらに外へ薄く広がる */
+}
+
+#as-disc-rot {
+  position: absolute;
+  inset: 0.5px;
+  border-radius: 50%;
+  overflow: hidden;
+  will-change: transform;
+}
+
+#as-disc-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+#as-disc-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#as-title {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  text-align: center;
+  text-indent: 1.28em;   /* 末尾の「。」のぶん中心が左にずれるので右へ寄せる */
+  background: none;
+  border: none;
+  outline: none;
+  font-family: "Klee One", cursive;
+  font-size: clamp(11.2px, 2.2vw, 19.6px);
+  color: #ffffff;
+  letter-spacing: 0.28em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  z-index: 4;
+  pointer-events: none;
+}
+
+#as-title.editable {
+  pointer-events: auto;
+  cursor: text;
+}
+
+#as-title.editable:hover {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+#as-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: #e8eae9;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  z-index: 5;
+}
+
+#as-hole::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16%;
+  height: 16%;
+  border-radius: 50%;
+  background: #8a8a8a;
+}
+
+/* 右：曲リストパネル */
+#as-panel {
+  position: absolute;
+  right: 5%;
+  top: 6%;
+  width: 38%;
+  height: 66%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 再生中の曲＋説明カード（枠になじむ半透明） */
+#as-nowcard {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 0 5px 5px rgba(189, 188, 188, 0.2),   /* 内側：白に近い明るいにじみ */
+    0 0 60px 30px rgba(238, 240, 239, 0.7),   /* 外側：筐体色へ広がるにじみ */
+    0 0 100px 50px rgba(232, 234, 233, 0.5);  /* さらに外へ薄く広がる */
+  flex-shrink: 0;
+}
+
+#as-now {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#as-swatch {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+#as-swatch img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#as-name {
+  font-size: 11.9px;
+  color: #2c333f;
+}
+
+#as-num {
+  font-size: 8.4px;
+  color: #9aa2ae;
+  margin-top: 2px;
+}
+
+#as-desc {
+  font-size: 9.1px;
+  color: #5a6472;
+  line-height: 1.7;
+  margin-top: 12px;
+  letter-spacing: 0.03em;
+}
+
+/* 選んだ曲リスト（枠になじむ半透明） */
+#as-tracklist {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 0 5px 5px rgba(189, 188, 188, 0.2),   /* 内側：白に近い明るいにじみ */
+    0 0 60px 30px rgba(238, 240, 239, 0.7),   /* 外側：筐体色へ広がるにじみ */
+    0 0 100px 50px rgba(232, 234, 233, 0.5);  /* さらに外へ薄く広がる */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.as-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  flex: 1;
+  border-bottom: 0.5px solid rgba(140, 130, 130, 0.18);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.as-track:last-child {
+  border-bottom: none;
+}
+
+.as-track:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.as-track.playing {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.as-track .t-num {
+  font-size: 9.1px;
+  color: #aab0b8;
+  width: 16px;
+  text-align: center;
+}
+
+.as-track .t-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.as-track .t-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.as-track .t-name {
+  flex: 1;
+  font-size: 12.5px;
+  color: #2c333f;
+}
+
+.as-track .t-dur {
+  font-size: 9.1px;
+  color: #aab0b8;
+}
+
+/* 下：プログレスバー */
+#as-progwrap {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 23%;
+}
+
+#as-prog {
+  position: relative;
+  height: 2px;
+  background: #cabfbf;
+  border-radius: 2px;
+}
+
+#as-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: #8a98ac;
+  border-radius: 2px;
+}
+
+#as-knob {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6a7686;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 下：立体ボタン（ニューモーフィズム） */
+#as-ctrl {
+  position: absolute;
+  left: 15%;
+  bottom: 6%;
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+/* ボタン＋下ラベルの縦並び */
+.as-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  /* ボタンとラベルの間隔。増やすと離れる */
+}
+
+.as-btn-label {
+  font-size: 11.2px;
+  color: #5a6472;
+  /* ラベルの色（白背景で読めるよう濃いグレーに） */
+  letter-spacing: 0.05em;
+}
+
+#as-ctrl button {
+  border: none;
+  cursor: pointer;
+  width: 110px;
+  height: 44px;
+  border-radius: 22px;
+  background: #e8eae9;
+  box-shadow:
+    -6px -6px 12px rgba(255, 255, 255, 0.9),
+     6px  6px 14px rgba(13, 39, 80, 0.16);
+  transition: box-shadow 0.12s, transform 0.1s;
+}
+
+#as-ctrl button:hover {
+  box-shadow:
+    -7px -7px 14px rgba(255, 255, 255, 0.95),
+     7px  7px 16px rgba(13, 39, 80, 0.18);
+}
+
+/* 押し込み：影を内側へ（凹む） */
+#as-ctrl button:active {
+  transform: none;
+  box-shadow:
+    inset -4px -4px 9px rgba(255, 255, 255, 0.85),
+    inset  5px  5px 11px rgba(13, 39, 80, 0.18);
+}
+
+/* 再生中はラベルの記号を切り替え */
+.as-btn-label .ic-pause {
+  display: none;
+}
+
+.as-btn-wrap:has(#as-play.playing) .ic-play {
+  display: none;
+}
+
+.as-btn-wrap:has(#as-play.playing) .ic-pause {
+  display: inline;
+}
+
+/* 音量ダイヤル（ニューモーフィズム） */
+#as-vol {
+  position: absolute;
+  right: 24%;
+  /* ボタン群との間。数字を増やすと左へ、減らすと右へ */
+  bottom: 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+#as-vol-dial {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #e8eae9;
+  box-shadow:
+    -6px -6px 12px rgba(255, 255, 255, 0.9),
+     6px  6px 14px rgba(13, 39, 80, 0.16);
+  cursor: grab;
+}
+
+#as-vol-dial:active {
+  cursor: grabbing;
+}
+
+/* つまみ位置を示す線 */
+#as-vol-mark {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background: #9aa2ae;
+  transform: translateX(-50%);
+  transform-origin: 50% 29px;
+  /* ダイヤル中心まわりに回す */
+}
+
+#as-vol-label {
+  font-size: 7.7px;
+  color: #5a6472;
+  letter-spacing: 0.15em;
+}
+
+/* Save Your Album */
+#as-time {
+  position: absolute;
+  right: 6%;
+  bottom: 19%;
+  font-size: 8.4px;
+  color: #8a8a86;
+  letter-spacing: 0.06em;
+}
+
+/* QRオーバーレイ */
+#as-qr-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(150, 155, 165, 0.55);
+  backdrop-filter: blur(4px);
+  border-radius: 48px;
+}
+
+#as-qr-overlay.show {
+  display: flex;
+  animation: fadeIn 0.3s ease;
+}
+
+#as-qr-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+}
+
+#as-qr {
+  width: 280px;
+  height: 280px;
+}
+
+#as-qr img,
+#as-qr canvas {
+  width: 280px !important;
+  height: 280px !important;
+}
+
+#as-qr-sub {
+  font-size: 12.5px;
+  color: #3a4250;
+  letter-spacing: 0.3em;
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* 色変更調整のためのコード */
+/* #album-screen {
+  display: flex !important;
+}
+#wall {
+  display: none !important;
+} */
+
+/* ===== 文字色＆ぼかしシャドウ（見出し・風名・説明など主要テキスト） ===== */
+#cf-maketitle,
+#cf-makesub,
+#cf-detail-name,
+#cf-detail-desc,
+#as-name,
+#as-num,
+#as-desc,
+.as-track .t-name {
+  color: #727171;
+  text-shadow: 0 1px 4px rgba(74, 73, 73, 0.45);
+  font-family: "IBM Plex Sans JP", sans-serif;
+  font-weight: 300;
+}
+
+/* ===== 改行が入る本文テキストの行送り（Illustrator 31.13pt ≒ 41.5px） ===== */
+#cf-detail-desc,
+#as-desc {
+  line-height: 41.5px;
+}
+
+/* サブ見出しは縦の行間を広めに */
+#cf-makesub {
+  line-height: 56px;
+}
+
+/* ===== タイトル未入力：枠＋点滅（入力すると枠と点滅が消える） ===== */
+#as-title.is-empty {
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  padding: 2px 10px;
+  width: 8em;
+  min-width: 0;
+  max-width: 60%;
+  animation: titleBlink 1.1s ease-in-out infinite;
+}
+
+/* placeholderの色（白系で点滅が見えるように） */
+#as-title::placeholder {
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
+}
+
+@keyframes titleBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* ===== 画面送りボタン（左=戻る / 右=次へ） ===== */
+#as-screen-prev,
+#as-screen-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 25;
+}
+
+#as-screen-prev { left: -84px; }
+#as-screen-next { right: -84px; }
+
+#as-screen-prev svg polyline,
+#as-screen-next svg polyline {
+  fill: none;
+  stroke: #9aa2ae;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
+}
+
+#as-screen-prev:hover svg polyline,
+#as-screen-next:not(:disabled):hover svg polyline {
+  stroke: #6a7280;
+}
+
+/* タイトル未入力のとき「次へ」は押せない */
+#as-screen-next:disabled {
+  cursor: not-allowed;
+}
+
+#as-screen-next:disabled svg polyline {
+  stroke: #d2d6dc;
+}
+
+/* ===== QR完成オーバーレイのタイトル ===== */
+#as-qr-title {
+  font-size: 16px;
+  color: #3a4250;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+#as-title {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  text-align: center;
+  background: none;
+  text-indent: 1.28em;
+}
+
+/* 確定済み（文字が入っている）ときだけ「。」分右へ寄せる */
+/* #as-title.confirmed {
+  text-indent: 1.28em;
+} */
+
+/* 確定した瞬間のふわっと一閃 */
+#as-title.just-confirmed {
+  animation: titleConfirm 0.6s ease;
+}
+
+@keyframes titleConfirm {
+  0%   { text-shadow: 0 1px 6px rgba(0,0,0,0.18), 0 0 0 rgba(255,255,255,0); }
+  40%  { text-shadow: 0 1px 6px rgba(0,0,0,0.18), 0 0 12px rgba(255,255,255,0.7); }
+  100% { text-shadow: 0 1px 6px rgba(0,0,0,0.18), 0 0 10px rgba(255,255,255,0.55); }
+}
+
+/* ===== 中央の再生ボタン：再生中は押し込まれたまま固定（もう一度で戻る） ===== */
+#as-play.playing,
+#as-play.playing:hover,
+#as-play.playing:active {
+  transform: none;
+  background: #e8eae9;
+  box-shadow:
+    inset -4px -4px 9px rgba(255, 255, 255, 0.85),
+    inset  5px  5px 11px rgba(13, 39, 80, 0.18);
+}
