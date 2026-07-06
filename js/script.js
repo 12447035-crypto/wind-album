@@ -734,29 +734,33 @@ function startAlbum(tracks){
     qrEl.innerHTML = '';
     new QRCode(qrEl, { text: url, width:280, height:280, colorDark:'#1d1d1f', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
   }
-  // タイトルの入力状態を反映：未入力なら枠＋点滅・次へ無効、入力済みなら枠と点滅を消し次へ有効
   function reflectTitleState(){
     const filled = titleIn.value.trim().length > 0;
     titleIn.classList.toggle('is-empty', !filled);
-    screenNext.disabled = !filled;
-    // 入力中は「確定済み」表示を一旦解除（打ち直し中とわかるように）
+    screenNext.disabled = true;                 // 入力しただけでは押せない（グレーのまま）
+    screenNext.classList.toggle('has-text', filled);
     titleIn.classList.remove('confirmed');
   }
-  titleIn.addEventListener('input', reflectTitleState);
 
-  // タイトル確定（入力できた感を出す）
   function confirmTitle(){
     const v = titleIn.value.trim();
     if (v.length === 0) return;   // 空は確定しない
     // 末尾に「。」を付ける（すでに付いていれば足さない＝二重防止）
     titleIn.value = v.endsWith('。') ? v : v + '。';
     titleIn.classList.add('confirmed');
+    // 確定したら未入力の枠と点滅を消す（これがないと枠が残り、幅8emで文字が切れる）
+    titleIn.classList.remove('is-empty');
+    // 確定したら「次へ」ボタンを押せるようにする（青くなる）
+    screenNext.disabled = false;
+    screenNext.classList.remove('has-text');   // グレー点滅は解除
     // 確定したらフォーカスを外してカーソルを消す（クリックでまた編集できる）
     titleIn.blur();
     // 一瞬光るフィードバック
     titleIn.classList.add('just-confirmed');
     setTimeout(() => titleIn.classList.remove('just-confirmed'), 600);
   }
+  // 文字を打つたびに状態を反映（打ち直したら青→グレーに戻す）
+  titleIn.addEventListener('input', reflectTitleState);
   // Enterで確定（改行はしない）。ただしIME変換中のEnterは無視する
   titleIn.addEventListener('keydown', e => {
     // IMEで日本語変換を確定するためのEnterは拾わない（内容の重複を防ぐ）
