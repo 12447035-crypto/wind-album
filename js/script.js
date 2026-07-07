@@ -527,8 +527,9 @@ function startAlbum(tracks){
     history.pushState({ album: true }, '');
 
     // 完成メッセージをふわっと表示（クリック/スワイプ/5秒で消える）
+    // 完成メッセージをふわっと表示（QRから来たときは出さない）
     const toast = document.getElementById('as-toast');
-    if (toast) {
+    if (toast && !window.__fromQR) {
       toast.classList.remove('hide');
       setTimeout(() => toast.classList.add('show'), 200);
       const hideToast = () => { toast.classList.remove('show'); toast.classList.add('hide'); };
