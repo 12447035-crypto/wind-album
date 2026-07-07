@@ -531,7 +531,7 @@ function startAlbum(tracks){
     reflectTitleState();
     generateQR();
 
-    applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
+    // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
     history.pushState({ album: true }, '');
   };
@@ -783,7 +783,7 @@ function startAlbum(tracks){
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
 
   // 画面回転・リサイズでスマホ⇔PC配置を切り替える
-  window.addEventListener('resize', applyMobileLayout);
+  // window.addEventListener('resize', applyMobileLayout);
 })();
 
 if ('scrollRestoration' in history) {
