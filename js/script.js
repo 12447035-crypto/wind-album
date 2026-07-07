@@ -2,7 +2,6 @@
 
 
 // ===== 各風のパラメータ（全30風） =====
-// mp3を入れた風には audio:'snd/風名.mp3' を付けています（未設定の風は音なし）
 const WIND_PARAMS = {
   '北風':     {h:212, sat:40, strength:.75, curl:.2,  dot:.4,  uneri:.5,  pitch:.3,  dur:198, desc:'北方から吹いてくる冷たい風。', audio:'snd/北風.mp3'},
   '山風':     {h:135, sat:48, strength:.5,  curl:.45, dot:.55, uneri:.55, pitch:.55, dur:241, desc:'山に吹く風。山から吹いてくる風。'},
@@ -38,7 +37,6 @@ const WIND_PARAMS = {
 const DEFAULT_PARAM = {h:200, sat:45, strength:.4, curl:.45, dot:.5, uneri:.5, pitch:.55, dur:200, desc:''};
 
 // snd フォルダに全30風のmp3が揃ったので、audio未設定の風にも自動でパスを補完
-// （ファイル名は「風名.mp3」で統一）
 Object.keys(WIND_PARAMS).forEach(name => {
   if (!WIND_PARAMS[name].audio) {
     WIND_PARAMS[name].audio = 'snd/' + name + '.mp3';
@@ -70,32 +68,25 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   const slotsEl   = document.getElementById('cf-slots');
   const confirmBtn= document.getElementById('cf-confirm');
 
-  // 試聴用の音声
   const cfAudio = document.getElementById('cf-audio');
   let previewing = false;
-  let shownIndex = -1;   // いま下部パネルに表示している風のindex
+  let shownIndex = -1;
 
   cards.forEach((c, i) => { c.dataset.index = i; });
 
   // タップ／クリックはステージ全体で受け取り、押した位置に最も近いカードを選ぶ。
-  // （カード同士が重なって、奥のカード＝端の薄いカードがタップを受け取れない問題を回避）
   scene.addEventListener('click', e => {
     const rect = scene.getBoundingClientRect();
-    const px = e.clientX - rect.left - rect.width / 2;   // ステージ中心からの横位置
-
-    // 表示中の各カードの「中心からの横位置」を計算し、押した位置に一番近いものを探す
+    const px = e.clientX - rect.left - rect.width / 2;
     let best = -1, bestDist = Infinity;
     cards.forEach((c, i) => {
       const offset = i - current, abs = Math.abs(offset);
-      if (abs > 4) return;                 // 非表示のカードは対象外
-      const cardX = offset * CARD_GAP;     // layout() の x と同じ式
+      if (abs > 4) return;
+      const cardX = offset * CARD_GAP;
       const d = Math.abs(px - cardX);
       if (d < bestDist) { bestDist = d; best = i; }
     });
     if (best < 0) return;
-
-    // 正面に来ていて、かつ動きが落ち着いている時だけ再生トグル。
-    // それ以外（横のカード・移動中）は、まず正面へ寄せるだけ。
     const settled = (best === Math.round(current)) && (Math.abs(current - best) < 0.08);
     if (settled) {
       previewing ? stopPreview() : startPreview();
@@ -106,15 +97,12 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
 
   function layout(){
     const diff = target - current;
-    // 指数補間（今までと同じ速さ感）に、終端だけ一定の最小速度を加えて
-    // スナップによる段差をなくす。Safariで最後にカクッとなるのを防ぐ。
     if (Math.abs(diff) < 0.0001) {
       current = target;
     } else {
       const ease = diff * 0.16;
-      const minStep = 0.0015 * Math.sign(diff);   // 終端で間引かれないための最小移動量
+      const minStep = 0.0015 * Math.sign(diff);
       current += (Math.abs(ease) > Math.abs(minStep)) ? ease : minStep;
-      // 行き過ぎ防止
       if ((diff > 0 && current > target) || (diff < 0 && current < target)) current = target;
     }
     cards.forEach((c, i) => {
@@ -122,8 +110,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
       if (abs > 4) { c.style.display = 'none'; return; }
       c.style.display = '';
       const x = offset * CARD_GAP, z = -abs * 90;
-      // offsetに応じて角度を連続変化させる（±26度でクランプ）。
-      // 正面に寄るほど0度に近づくので、斜め→正面がなめらかになる。
       const rotY = Math.max(-26, Math.min(26, -offset * 26));
       const scale = Math.max(0.55, 1 - abs * 0.11);
       const opacity = Math.max(0.12, 1 - abs * 0.28);
@@ -142,7 +128,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
 
   scene.addEventListener('wheel', e => {
     if (wheelLock) return;
-    // 左右スクロールのみでCDを切替。上下スクロールはページに通す
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     e.preventDefault();
     target += e.deltaX > 0 ? 1 : -1;
@@ -150,16 +135,15 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     wheelLock = true; setTimeout(() => { wheelLock = false; }, 120);
   }, { passive:false });
 
-  // ---- タッチ操作（タブレット/スマホ）：横スワイプでCDを切替 ----
-  // 横方向の指の動きが縦より大きいときだけ送る。縦スワイプはページスクロールに通す。
+  // ---- タッチ操作：横スワイプでCDを切替 ----
   let tStartX = 0, tStartY = 0, tLastX = 0, tHorizontal = null, tBaseTarget = 0;
-  const SWIPE_STEP = 45;   // 何px動かすごとに1枚送るか（小さいほど敏感）
+  const SWIPE_STEP = 45;
 
   scene.addEventListener('touchstart', e => {
     const t = e.touches[0];
     tStartX = tLastX = t.clientX;
     tStartY = t.clientY;
-    tHorizontal = null;          // まだ縦横どちらの動きか未確定
+    tHorizontal = null;
     tBaseTarget = Math.round(target);
   }, { passive: true });
 
@@ -167,35 +151,29 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     const t = e.touches[0];
     const dx = t.clientX - tStartX;
     const dy = t.clientY - tStartY;
-
-    // 最初に動いた方向で「横スワイプか縦スクロールか」を判定
     if (tHorizontal === null) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;  // 小さすぎる動きは保留
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       tHorizontal = Math.abs(dx) > Math.abs(dy);
     }
-    // 縦スクロールならページに任せる（何もしない）
     if (!tHorizontal) return;
-
-    // 横スワイプ：ページが動かないようにしてCDを送る
     e.preventDefault();
-    // スワイプ量に応じて、開始時の位置から何枚ぶん動いたか
-    const steps = Math.round(-dx / SWIPE_STEP);   // 左へスワイプ→次のCDへ
+    const steps = Math.round(-dx / SWIPE_STEP);
     target = Math.max(0, Math.min(cards.length - 1, tBaseTarget + steps));
     tLastX = t.clientX;
   }, { passive: false });
 
-  // ---- 端ホバーで自動スクロール（左右の端のカードに触れるとその方向へ流れる）----
-  let edgeDir = 0;        // -1:左へ 0:止 1:右へ
+  // ---- 端ホバーで自動スクロール ----
+  let edgeDir = 0;
   let edgeTimer = null;
-  const EDGE_RATIO = 0.07;   // 左右それぞれ端から何割をスクロールゾーンにするか（小さいほど内側）
-  const EDGE_INTERVAL = 550; // 1枚送る間隔(ms)。小さいほど速い
+  const EDGE_RATIO = 0.07;
+  const EDGE_INTERVAL = 550;
 
   scene.addEventListener('mousemove', e => {
     const rect = scene.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;   // 0(左端)〜1(右端)
+    const x = (e.clientX - rect.left) / rect.width;
     let dir = 0;
-    if (x < EDGE_RATIO)        dir = -1;   // 左端ゾーン
-    else if (x > 1 - EDGE_RATIO) dir = 1;  // 右端ゾーン
+    if (x < EDGE_RATIO)        dir = -1;
+    else if (x > 1 - EDGE_RATIO) dir = 1;
     setEdgeDir(dir);
   });
   scene.addEventListener('mouseleave', () => setEdgeDir(0));
@@ -205,7 +183,7 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     edgeDir = dir;
     if (edgeTimer) { clearInterval(edgeTimer); edgeTimer = null; }
     if (edgeDir !== 0) {
-      stepEdge();                                  // すぐ1枚送る
+      stepEdge();
       edgeTimer = setInterval(stepEdge, EDGE_INTERVAL);
     }
   }
@@ -219,7 +197,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     if (e.key === 'ArrowLeft')  target = Math.max(0, target - 1);
   });
 
-  // 中央の風が変わるたびに、下部パネル（名前・説明・試聴・addボタン）を更新
   function showDetail(card){
     shownIndex = parseInt(card.dataset.index, 10);
     const name = card.dataset.name; const param = getParam(name);
@@ -247,14 +224,13 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     updateAddBtn(idx); renderSlots();
   });
 
-  // ---- 試聴（本物の音声）----
   playBtn.addEventListener('click', e => { e.stopPropagation(); previewing ? stopPreview() : startPreview(); });
 
   function startPreview(){
     if (shownIndex < 0) return;
     const name = cards[shownIndex].dataset.name;
     const src = getParam(name).audio || '';
-    if (!src) { return; }              // mp3がない風は何もしない
+    if (!src) { return; }
     cfAudio.src = src;
     cfAudio.currentTime = 0;
     cfAudio.play();
@@ -268,7 +244,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   }
   function setProgress(t){ progFill.style.width = (t*100) + '%'; progKnob.style.left = (t*100) + '%'; }
 
-  // 再生位置に合わせてバーを動かす（曲の長さに自動で合う）
   cfAudio.addEventListener('timeupdate', () => {
     if (cfAudio.duration) setProgress(cfAudio.currentTime / cfAudio.duration);
   });
@@ -292,7 +267,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           renderSlots();
           if (shownIndex >= 0) updateAddBtn(shownIndex);
         });
-        // スロットをクリックしたらその風を中央に表示
         div.querySelector('.thumb').addEventListener('click', ev => {
           ev.stopPropagation();
           target = ci;
@@ -302,7 +276,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     }
     const justCompleted = (picked.length === MAX) && !confirmBtn.classList.contains('show');
     confirmBtn.classList.toggle('show', picked.length === MAX);
-    // 5つ揃った瞬間だけ、完成ボタンへ自動スクロール
     if (justCompleted) {
       setTimeout(() => {
         confirmBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -327,7 +300,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
 
   layout();
   renderSlots();
-  // 初期表示：中央の風をパネルに反映
   if (cards.length) showDetail(cards[0]);
 })();
 
@@ -337,7 +309,7 @@ function startAlbum(tracks){
   const loading = document.getElementById('album-loading');
   const wall = document.getElementById('wall');
   loading.classList.add('show');
-  wall.style.visibility = 'hidden';   // 選択画面を隠す（ちらつき防止）
+  wall.style.visibility = 'hidden';
   setTimeout(() => {
     loading.classList.remove('show');
     window.openAlbum(tracks);
@@ -345,7 +317,7 @@ function startAlbum(tracks){
 }
 
 
-// ===== 完成画面（CDプレイヤー筐体・プレイヤー・QR・音量ダイヤル）=====
+// ===== 完成画面 =====
 (function(){
   const screen   = document.getElementById('album-screen');
   const titleIn  = document.getElementById('as-title');
@@ -367,34 +339,27 @@ function startAlbum(tracks){
   const qrOverlay= document.getElementById('as-qr-overlay');
   const qrEl     = document.getElementById('as-qr');
 
-  // 完成画面の再生用の音声
   const asAudio = document.getElementById('as-audio');
 
   // ---- Web Audio（音量調整用）----
-  // iPad/iOSのSafariは audio.volume への代入を無視するため、
-  // GainNode を間に挟んで音量（ゲイン）を変える。これならiPadでも効く。
   let audioCtx = null, gainNode = null, srcNode = null;
-  let curVol = 0.6;   // 現在の音量(0〜1)。ダイヤルと共有する
+  let curVol = 0.6;
   function setupAudioGraph(){
-    if (audioCtx) return;   // 一度だけ作る
+    if (audioCtx) return;
     const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;        // 非対応ブラウザは従来の volume にフォールバック
+    if (!AC) return;
     audioCtx = new AC();
     gainNode = audioCtx.createGain();
     gainNode.gain.value = curVol;
-    // audio要素 → gain → スピーカー の順につなぐ
     srcNode = audioCtx.createMediaElementSource(asAudio);
     srcNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
   }
-  // 音量を反映（GainNodeがあればそれを、無ければ従来のvolumeを使う）
   function applyVolume(v){
     curVol = Math.max(0, Math.min(1, v));
     if (gainNode) gainNode.gain.value = curVol;
     else asAudio.volume = curVol;
   }
-  // iOSはユーザー操作をきっかけにしないとAudioContextが動かない(suspended)。
-  // 再生開始時に呼んで起こす。
   function ensureAudioRunning(){
     setupAudioGraph();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -405,10 +370,11 @@ function startAlbum(tracks){
 
   let cdP = null, P = null, phaseT = 0, htCenters = [], htPhaseBase = 0, SZ = 480, ready = false, running = false, discAngle = 0;
   let discSpeed = 0.2, targetSpeed = 0.2;
-  // リボン用：再生中の曲に合わせて 速さ(ribbonSpeed) と 大きさ(ribbonScale) を
-  // 現在値→目標値へなめらかに追従させる（曲が変わるとカクッとならないように）
   let ribbonSpeed = 0.02, targetRibbonSpeed = 0.02;
   let ribbonScale = 1.0,  targetRibbonScale = 1.0;
+
+  // スマホ配置フラグ
+  let mobileLaidOut = false;
 
   function deriveParams(){
     const ws = tracks.map(t => t.param);
@@ -427,7 +393,7 @@ function startAlbum(tracks){
     p.setup = () => {
       const host = document.getElementById('as-disc-canvas');
       SZ = host.clientWidth || 480;
-      p.pixelDensity(1);                 // Retinaの高解像度描画をやめて軽量化
+      p.pixelDensity(1);
       const c = p.createCanvas(SZ, SZ); c.parent(host);
       p.colorMode(p.HSL, 360, 100, 100, 1); p.clear();
     };
@@ -439,7 +405,6 @@ function startAlbum(tracks){
     p.draw = () => {
       if (!ready) { p.clear(); return; }
       if (running) {
-        // リボンの速さ・大きさを目標値へなめらかに寄せる（曲切替時の移行をなだらかに）
         ribbonSpeed += (targetRibbonSpeed - ribbonSpeed) * 0.04;
         ribbonScale += (targetRibbonScale - ribbonScale) * 0.04;
         phaseT += ribbonSpeed;
@@ -484,7 +449,6 @@ function startAlbum(tracks){
       const baseCenterY=SZ*0.5,ribbons=3,assign=[P.ws[2],P.ws[3],P.ws[1]];
       for(let rb=0;rb<ribbons;rb++){
         const w=assign[rb%assign.length];
-        // 波の大きさ(amp)に ribbonScale を掛けて、再生中の曲のうねりを反映
         const amp=SZ*(0.05+w.uneri*0.20)*ribbonScale,freq=0.5+(1-w.pitch)*1.6,twist=0.6+w.curl*1.4;
         const phase=rb*1.3+phaseT*1.2,cYoff=(rb-1)*SZ*0.05,copies=24,ribbonHeight=SZ*(0.05+w.uneri*0.22),baseA=0.6-rb*0.08;
         for(let i=0;i<copies;i++){
@@ -533,7 +497,6 @@ function startAlbum(tracks){
       row.addEventListener('click', () => selectTrack(n));
       tlEl.appendChild(row);
 
-      // 実際のmp3の長さを読み込んで秒数を差し替える
       if (t.audio && !t.realDur) {
         const probe = new Audio();
         probe.preload = 'metadata';
@@ -543,7 +506,7 @@ function startAlbum(tracks){
             t.realDur = probe.duration;
             const durEl = tlEl.querySelectorAll('.as-track .t-dur')[n];
             if (durEl) durEl.textContent = fmtTime(t.realDur);
-            if (n === cur) updatePlayer();   // 再生中の表示も更新
+            if (n === cur) updatePlayer();
           }
         });
       }
@@ -557,7 +520,6 @@ function startAlbum(tracks){
   window.openAlbum = function(selectedTracks){
     tracks = selectedTracks;
     seed = Math.floor(Math.random()*999999);
-    // タイトルは未入力スタート（「title」が点滅し、入力すると枠と点滅が消える）
     titleIn.value = '';
 
     buildVisual();
@@ -571,55 +533,61 @@ function startAlbum(tracks){
 
     applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
-    history.pushState({ album: true }, '');   // 戻る用の履歴を積む
+    history.pushState({ album: true }, '');
   };
 
   function closeAlbum(){
     stopPlay();
     qrOverlay.classList.remove('show');
     screen.classList.remove('show');
-    document.getElementById('wall').style.visibility = 'visible';   // 選択画面を戻す
+    document.getElementById('wall').style.visibility = 'visible';
   }
 
-  // ===== スマホ用レイアウト並べ替え =====
-  // スマホ幅のときだけ、筐体の中を「CD」＋「液晶・ボタン・音量の横一列」にして、
-  // 曲リストを筐体の外に出す。PC/iPadでは元の配置に戻す。
-  const deckEl      = document.getElementById('as-deck');
-  const consoleEl   = document.getElementById('as-console');
-  const nowcardEl   = document.getElementById('as-nowcard');
-  const ctrlEl      = document.getElementById('as-ctrl');
-  const volEl       = document.getElementById('as-vol');
-  const panelEl     = document.getElementById('as-panel');
-  const tracklistEl = document.getElementById('as-tracklist');
-  let mobileLaidOut = false;   // 今スマホ配置になっているか
-
+  // ===== スマホ用レイアウト並べ替え（安全版） =====
+  // moveInto ヘルパーで「移動先が今の親と違うときだけ」動かす。
+  // 既に正しい場所にある要素を再appendして HierarchyRequestError になるのを防ぐ。
   function applyMobileLayout(){
+    const deckEl      = document.getElementById('as-deck');
+    const consoleEl   = document.getElementById('as-console');
+    const nowcardEl   = document.getElementById('as-nowcard');
+    const ctrlEl      = document.getElementById('as-ctrl');
+    const volEl       = document.getElementById('as-vol');
+    const panelEl     = document.getElementById('as-panel');
+    const tracklistEl = document.getElementById('as-tracklist');
+    if (!deckEl || !consoleEl || !nowcardEl || !ctrlEl || !volEl || !panelEl || !tracklistEl) return;
+
     const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
-    if (isMobile && !mobileLaidOut) {
-      // 液晶・ボタン・音量を横一列の入れ物(console)へ移動
-      consoleEl.appendChild(nowcardEl);
-      consoleEl.appendChild(ctrlEl);
-      consoleEl.appendChild(volEl);
-      // 曲リストを筐体(deck)の外＝album-screen直下へ出す
-      screen.appendChild(tracklistEl);
+    const moveInto = (child, parent) => {
+      if (child && parent && child.parentNode !== parent) {
+        parent.appendChild(child);
+      }
+    };
+
+    if (isMobile) {
+      // スマホ：console に 液晶・ボタン・音量、album-screen 直下に曲リスト
+      moveInto(nowcardEl, consoleEl);
+      moveInto(ctrlEl, consoleEl);
+      moveInto(volEl, consoleEl);
+      moveInto(tracklistEl, screen);
       mobileLaidOut = true;
-    } else if (!isMobile && mobileLaidOut) {
-      // PC/iPadに戻すとき：元の場所へ戻す
-      panelEl.insertBefore(nowcardEl, panelEl.firstChild);  // パネルの先頭に液晶
-      panelEl.appendChild(tracklistEl);                     // パネルに曲リスト
-      deckEl.appendChild(ctrlEl);                           // 筐体にボタン
-      deckEl.appendChild(volEl);                            // 筐体に音量
+    } else {
+      // PC/iPad：元の場所へ戻す
+      moveInto(nowcardEl, panelEl);
+      moveInto(ctrlEl, deckEl);
+      moveInto(volEl, deckEl);
+      moveInto(tracklistEl, panelEl);
+      // パネル内の順番を整える（液晶を先頭、曲リストを後ろに）
+      if (nowcardEl.parentNode === panelEl) panelEl.insertBefore(nowcardEl, panelEl.firstChild);
+      if (tracklistEl.parentNode === panelEl) panelEl.appendChild(tracklistEl);
       mobileLaidOut = false;
     }
   }
 
-  // ブラウザの戻るボタンで完成画面を閉じる
   window.addEventListener('popstate', () => {
     if (screen.classList.contains('show')) { closeAlbum(); }
   });
 
-  // 今の曲の音声を読み込む（mp3があるときだけ）
   function loadTrack(){
     const t = tracks[cur];
     if (t && t.audio) { asAudio.src = t.audio; asAudio.currentTime = 0; }
@@ -633,7 +601,6 @@ function startAlbum(tracks){
     numEl.textContent = 'トラック ' + (cur+1) + ' / ' + tracks.length;
     descEl.textContent = t.desc || '';
 
-    // 実時間優先：再生中の音声→事前計測→最後の手段で擬似dur
     const total = (asAudio.duration && isFinite(asAudio.duration)) ? asAudio.duration
                 : (t.realDur || t.dur);
     const cur_s = prog * total;
@@ -643,16 +610,12 @@ function startAlbum(tracks){
     const cm=Math.floor(cur_s/60), cs=String(Math.floor(cur_s%60)).padStart(2,'0');
     timeEl.textContent = cm+':'+cs+' / '+mm+':'+ss;
 
-    // CDの回転速度（既存）：風の強さで決める
     targetSpeed = 0.5 + (t.param.strength || 0.4) * 2.0;
-    // リボンの速さ：風の強さで決める（強い風ほど速く流れる）
     targetRibbonSpeed = 0.012 + (t.param.strength || 0.4) * 0.045;
-    // リボンの大きさ：うねりで決める（うねりが大きいほど波も大きい）
     targetRibbonScale = 0.6 + (t.param.uneri || 0.5) * 1.1;
   }
 
   function updateTitleEditable(){
-    // 再生中は編集不可、停止中は編集可（クリックできる）
     if (playing) {
       titleIn.classList.remove('editable');
       titleIn.readOnly = true;
@@ -667,12 +630,10 @@ function startAlbum(tracks){
     playing = true; running = true; playEl.classList.add('playing'); updateTitleEditable();
     const t = tracks[cur];
     if (t && t.audio) {
-      // 本物の音声
-      ensureAudioRunning();   // iOS対策：再生のタイミングでAudioContextを起こす
+      ensureAudioRunning();
       if (!asAudio.src || asAudio.src === location.href) loadTrack();
       asAudio.play();
     } else {
-      // mp3がない曲は擬似タイマー
       tick();
     }
   }
@@ -683,11 +644,10 @@ function startAlbum(tracks){
     if (titleIn) titleIn.style.transform = 'translateX(-50%) rotate(0deg)';
   }
 
-  // mp3がない曲用の擬似タイマー
   function tick(){
     if(!playing) return;
     const t=tracks[cur];
-    if (t.audio) return;              // 本物の音声がある曲はここを使わない
+    if (t.audio) return;
     prog += 1/(t.dur*3);
     if(prog>=1){
       if(cur<tracks.length-1){ cur++; prog=0; loadTrack(); updatePlayer(); highlight(); startPlay(); return; }
@@ -697,18 +657,15 @@ function startAlbum(tracks){
     timer=setTimeout(tick,333);
   }
 
-  // 本物の音声の進行に合わせてバー・時間を更新
   asAudio.addEventListener('timeupdate', () => {
     if (!playing || !asAudio.duration) return;
     prog = asAudio.currentTime / asAudio.duration;
     updatePlayer();
   });
-  // 曲が終わったら次の曲へ
   asAudio.addEventListener('ended', () => {
     if (cur < tracks.length - 1) { cur++; prog = 0; loadTrack(); updatePlayer(); highlight(); startPlay(); }
     else { prog = 1; stopPlay(); updatePlayer(); }
   });
-  // メタデータ（曲の長さ）が読めたら時間表示を更新
   asAudio.addEventListener('loadedmetadata', () => { updatePlayer(); });
 
   playEl.addEventListener('click', ()=> playing?stopPlay():startPlay());
@@ -720,18 +677,16 @@ function startAlbum(tracks){
     const dial = document.getElementById('as-vol-dial');
     const mark = document.getElementById('as-vol-mark');
     if (!dial) return;
-    let vol = curVol;              // 0〜1（初期音量。Web Audio側と共有）
-    const MIN = -135, MAX = 135;   // 回転の角度範囲
+    let vol = curVol;
+    const MIN = -135, MAX = 135;
     function render(){
       const deg = MIN + (MAX - MIN) * vol;
       mark.style.transform = `translateX(-50%) rotate(${deg}deg)`;
-      applyVolume(vol);   // GainNode経由で音量を反映（iPadでも効く）
+      applyVolume(vol);
     }
     render();
 
     let dragging = false;
-    // マウス・タッチ両対応で座標(clientX/Y)を取り出す
-    // （iPadの指の操作は e.touches[0] の中に座標が入っているため）
     function getXY(e){
       if (e.touches && e.touches.length)        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
       if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
@@ -747,16 +702,13 @@ function startAlbum(tracks){
       vol = (ang - MIN) / (MAX - MIN);
       render();
     }
-    // マウス
     dial.addEventListener('mousedown', e => { dragging = true; setFromEvent(e); e.preventDefault(); });
     window.addEventListener('mousemove', e => { if (dragging) setFromEvent(e); });
     window.addEventListener('mouseup', () => { dragging = false; });
-    // タッチ（iPad/スマホ）：指でダイヤルを回して音量を変える
     dial.addEventListener('touchstart', e => { dragging = true; setFromEvent(e); e.preventDefault(); }, { passive:false });
     window.addEventListener('touchmove', e => { if (dragging) { setFromEvent(e); e.preventDefault(); } }, { passive:false });
     window.addEventListener('touchend', () => { dragging = false; });
     window.addEventListener('touchcancel', () => { dragging = false; });
-    // ホイール（PCのトラックパッド等）
     dial.addEventListener('wheel', e => { e.preventDefault(); vol = Math.max(0, Math.min(1, vol + (e.deltaY < 0 ? 0.05 : -0.05))); render(); }, { passive:false });
   })();
 
@@ -768,61 +720,48 @@ function startAlbum(tracks){
     qrEl.innerHTML = '';
     new QRCode(qrEl, { text: url, width:280, height:280, colorDark:'#1d1d1f', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
   }
+
   function reflectTitleState(){
     const filled = titleIn.value.trim().length > 0;
     titleIn.classList.toggle('is-empty', !filled);
-    screenNext.disabled = true;                 // 入力しただけでは押せない（グレーのまま）
+    screenNext.disabled = true;
     screenNext.classList.toggle('has-text', filled);
     titleIn.classList.remove('confirmed');
   }
+  titleIn.addEventListener('input', reflectTitleState);
 
   function confirmTitle(){
     const v = titleIn.value.trim();
-    if (v.length === 0) return;   // 空は確定しない
-    // 末尾に「。」を付ける（すでに付いていれば足さない＝二重防止）
+    if (v.length === 0) return;
     titleIn.value = v.endsWith('。') ? v : v + '。';
     titleIn.classList.add('confirmed');
-    // 確定したら未入力の枠と点滅を消す（これがないと枠が残り、幅8emで文字が切れる）
-    titleIn.classList.remove('is-empty');
-    // 確定したら「次へ」ボタンを押せるようにする（青くなる）
-    screenNext.disabled = false;
-    screenNext.classList.remove('has-text');   // グレー点滅は解除
-    // 確定したらフォーカスを外してカーソルを消す（クリックでまた編集できる）
+    titleIn.classList.remove('is-empty');      // 確定したら枠と点滅を消す
+    screenNext.disabled = false;               // 確定したら「次へ」を押せるように
+    screenNext.classList.remove('has-text');   // グレー点滅を解除
     titleIn.blur();
-    // 一瞬光るフィードバック
     titleIn.classList.add('just-confirmed');
     setTimeout(() => titleIn.classList.remove('just-confirmed'), 600);
   }
-  // 文字を打つたびに状態を反映（打ち直したら青→グレーに戻す）
-  titleIn.addEventListener('input', reflectTitleState);
-  // Enterで確定（改行はしない）。ただしIME変換中のEnterは無視する
   titleIn.addEventListener('keydown', e => {
-    // IMEで日本語変換を確定するためのEnterは拾わない（内容の重複を防ぐ）
     if (e.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter') { e.preventDefault(); confirmTitle(); titleIn.blur(); }
   });
-  // フォーカスを外したときも確定扱い
   titleIn.addEventListener('blur', confirmTitle);
 
-  // 次の画面へ（QR完成オーバーレイを枠の中央に被せる）
   screenNext.addEventListener('click', () => {
     if (screenNext.disabled) return;
     stopPlay();
     generateQR();
     qrOverlay.classList.add('show');
   });
-  // 前の画面へ戻る（QRを閉じる→閉じていれば選択画面へ戻る）
   screenPrev.addEventListener('click', () => {
     if (qrOverlay.classList.contains('show')) {
-      qrOverlay.classList.remove('show');     // まずQRを閉じる
+      qrOverlay.classList.remove('show');
     } else {
-      history.back();                          // 完成画面を閉じて選択画面へ
+      history.back();
     }
   });
   qrOverlay.addEventListener('click', () => qrOverlay.classList.remove('show'));
-
-  // 画面回転・リサイズでスマホ⇔PC配置を切り替える
-  window.addEventListener('resize', applyMobileLayout);
 
   function restoreFromURL(){
     const m = location.search.match(/[?&]album=([^&]+)/);
@@ -836,21 +775,21 @@ function startAlbum(tracks){
         const pm = getParam(name);
         return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
       });
-      // 選択画面を隠してからアルバムを開く（QRから来た人にいきなり完成画面を見せる）
       document.getElementById('wall').style.visibility = 'hidden';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
     } catch(e){ console.warn('復元に失敗', e); }
   }
-  // ページ表示後に少し待ってから復元（画像やDOMが確実に揃ってから）
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
+
+  // 画面回転・リサイズでスマホ⇔PC配置を切り替える
+  window.addEventListener('resize', applyMobileLayout);
 })();
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 window.addEventListener('load', () => {
-  // QRからの復元（?album=付き）でない通常リロードのときだけ先頭へ
   if (!location.search.match(/[?&]album=/)) {
     window.scrollTo(0, 0);
   }
