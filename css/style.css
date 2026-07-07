@@ -1221,6 +1221,7 @@ body {
     border-radius: 0;
     display: flex;
     flex-direction: column;
+    gap: 8vw;  
     z-index: 1;
   }
 
