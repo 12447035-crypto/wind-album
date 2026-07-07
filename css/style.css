@@ -1189,8 +1189,8 @@ body {
 /* 音量：ボタンの行に絶対配置で横並び。筐体内の右寄りに置く */
 #as-vol {
   position: absolute;
-  right: 8vw;
-  bottom: 6vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
+  right: 10vw;
+  bottom: 4vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
   order: 0;
   flex-direction: column;
   margin: 0;
