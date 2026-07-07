@@ -1115,7 +1115,7 @@ body {
   color: #3a4250;
   letter-spacing: 0.12em;
   text-align: center;
-}git add .
+}
 
 /* ===== 中央の再生ボタン：再生中は押し込まれたまま固定（もう一度で戻る） ===== */
 #as-play.playing,
@@ -1255,20 +1255,152 @@ body {
   .as-track .t-name  { font-size: 4vw; }
   .as-track .t-dur   { font-size: 3vw; }
 
-  /* 戻る矢印・保存ボタン：曲リストに重ならないよう筐体の角に固定 */
-  #as-screen-prev {
-    position: fixed;
-    left: 3vw; top: 5vw;
-    transform: none;
-  }
+  /* スマホでは戻る・保存ボタンを消す */
+  #as-screen-prev,
   #as-screen-next {
-    position: fixed;
-    right: 3vw; top: 5vw;
-    transform: none;
+    display: none;
   }
-  #as-screen-next .next-ring { width: 44px; height: 44px; }
 
   /* QRオーバーレイ：画面全体に */
+  #as-qr-overlay { position: fixed; border-radius: 0; }
+  #as-qr-card { padding: 24px 20px; gap: 16px; }
+  #as-qr, #as-qr img, #as-qr canvas {
+    width: 62vw !important; height: 62vw !important;
+    max-width: 280px; max-height: 280px;
+  }
+}
+
+/* ========================================================== */
+/* ===== スマホ縦レイアウト（幅600px以下のときだけ効く） ===== */
+/* JSで #as-console に 液晶・ボタン・音量 を移動、             */
+/* 曲リストは筐体の外(album-screen直下)へ移動している前提      */
+/* iPad/PCの横長デザインには一切影響しません                  */
+/* ========================================================== */
+@media (max-width: 600px) {
+
+  /* 完成画面：上から縦に流す＋スクロール可＋余白たっぷり */
+  #album-screen {
+    padding: 10vw 6vw 16vw;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;                 /* 縦スクロール復活 */
+    -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+  }
+  #album-screen.show { display: flex; }
+
+  /* 筐体：小さめの縦長プレーヤー。中はCDと横一列コンソールのみ */
+  #as-deck {
+    position: relative;
+    width: 88%;                       /* 少し小さく */
+    max-width: 88%;
+    aspect-ratio: auto;
+    max-height: none;
+    height: auto;
+    margin: 0 auto 8vw;
+    padding: 6vw 5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5vw;
+    border-radius: 32px;
+  }
+
+  /* CD：筐体の上部。少し小さめにして余白を確保 */
+  #as-disc-wrap {
+    position: relative;
+    left: auto; top: auto;
+    transform: none;
+    width: 70%;                       /* 小さめ */
+    max-width: 340px;
+    margin: 2vw auto;
+  }
+  #as-title { font-size: clamp(12px, 3.8vw, 18px); }
+
+  /* 横一列コンソール：液晶（左）＋ボタン＋音量（右）。ここを表示に戻す */
+  #as-console {
+    display: flex;                    /* ← これで液晶・ボタン・音量が復活 */
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5vw;
+    width: 100%;
+    padding: 1vw 0;
+  }
+
+  /* 液晶（再生中の曲情報）：左に小さく */
+  #as-nowcard {
+    flex: 1;
+    min-width: 0;
+    padding: 2.5vw 3vw;
+    margin: 0;
+  }
+  #as-name { font-size: 3.2vw; }
+  #as-num  { font-size: 2.4vw; }
+  #as-desc {
+    font-size: 2.6vw;
+    line-height: 1.6;
+    margin-top: 1.5vw;
+  }
+
+  /* ボタン3つ：小さく横並び */
+  #as-ctrl {
+    position: relative;
+    left: auto; bottom: auto;
+    gap: 1.5vw;
+    flex-shrink: 0;
+  }
+  #as-ctrl button {
+    width: 9vw;  max-width: 44px;
+    height: 7vw; max-height: 34px;
+    border-radius: 18px;
+  }
+  .as-btn-wrap { gap: 1vw; }
+  .as-btn-label { font-size: 2.2vw; }
+
+  /* 音量ダイヤル：右端に小さく */
+  #as-vol {
+    position: relative;
+    right: auto; bottom: auto;
+    flex-shrink: 0;
+  }
+  #as-vol-dial {
+    width: 11vw;  max-width: 48px;
+    height: 11vw; max-height: 48px;
+  }
+  #as-vol-label { font-size: 2vw; }
+
+  /* プログレスバーと時間は筐体内では邪魔なので隠す */
+  #as-progwrap { display: none; }
+  #as-time { display: none; }
+
+  /* 曲リスト：筐体の外に、背景なしで並べる（余白たっぷり） */
+  #as-tracklist {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    width: 88%;
+    margin: 4vw auto 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .as-track {
+    padding: 3.5vw 1vw;
+    gap: 4vw;
+    flex: none;
+    border-bottom: 0.5px solid rgba(140, 130, 130, 0.15);
+  }
+  .as-track .t-num   { font-size: 3vw; width: 5vw; }
+  .as-track .t-thumb { width: 11vw; height: 11vw; max-width: 48px; max-height: 48px; }
+  .as-track .t-name  { font-size: 3.8vw; }
+  .as-track .t-dur   { font-size: 3vw; }
+
+  /* スマホでは戻るボタン・保存ボタンを消す（結果だけ見せる） */
+  #as-screen-prev,
+  #as-screen-next {
+    display: none;
+  }
+
+  /* QRオーバーレイ：スマホでは使わないが念のため画面全体に */
   #as-qr-overlay { position: fixed; border-radius: 0; }
   #as-qr-card { padding: 24px 20px; gap: 16px; }
   #as-qr, #as-qr img, #as-qr canvas {

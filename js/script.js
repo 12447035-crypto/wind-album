@@ -571,8 +571,6 @@ function startAlbum(tracks){
 
     applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
-
-    screen.classList.add('show');
     history.pushState({ album: true }, '');   // 戻る用の履歴を積む
   };
 
