@@ -1095,7 +1095,7 @@ body {
 @media (max-width: 600px) {
 
   #album-screen {
-    padding: 10vw 5vw 16vw;
+    padding: 8vw 5vw 16vw;
     align-items: center;
     justify-content: flex-start;
     overflow-y: auto;
@@ -1103,22 +1103,22 @@ body {
   }
   #album-screen.show { display: block; }
 
-  /* 筐体：縦に。overflow を visible にして曲リストが下にはみ出せるように */
+  /* 筐体：高さは中身（CD〜音量）ぶんで固定。曲リストははみ出して外に見せる */
   #as-deck {
     position: relative;
-    width: 90%;
-    max-width: 90%;
+    width: 88%;
+    max-width: 88%;
     aspect-ratio: auto;
     max-height: none;
     height: auto;
     margin: 0 auto;
-    padding: 7vw 5vw;
+    padding: 6vw 5vw;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4vw;
+    gap: 3vw;
     border-radius: 32px;
-    overflow: visible;   /* 曲リストのはみ出しを見せる */
+    overflow: visible;
   }
 
   /* CD */
@@ -1126,26 +1126,22 @@ body {
     position: relative;
     left: auto; top: auto;
     transform: none;
-    width: 66%;
-    max-width: 320px;
+    width: 62%;
+    max-width: 300px;
     margin: 1vw auto;
     order: 1;
   }
-  #as-title { font-size: clamp(12px, 3.6vw, 17px); }
+  #as-title { font-size: clamp(12px, 3.4vw, 16px); }
 
-  /* パネル（液晶＋曲リスト）：絶対配置解除 */
+  /* パネル（液晶だけ）：筐体内、CDの下 */
   #as-panel {
     position: relative;
     right: auto; top: auto;
     width: 100%;
     height: auto;
-    display: contents;   /* 中の液晶と曲リストを直接 deck の子として並べる */
-  }
-
-  /* 液晶（曲情報）：筐体の中、CDの下 */
-  #as-nowcard {
     order: 2;
-    width: 100%;
+  }
+  #as-nowcard {
     padding: 3vw 4vw;
     margin: 0;
   }
@@ -1153,7 +1149,19 @@ body {
   #as-num  { font-size: 2.6vw; }
   #as-desc { font-size: 2.8vw; line-height: 1.6; margin-top: 2vw; }
 
-  /* 再生ボタン＋音量を横一列に（順番：液晶の次） */
+  /* プログレスバー：液晶の下 */
+  #as-progwrap {
+    position: relative;
+    left: auto; right: auto; bottom: auto;
+    width: 100%;
+    margin: 2vw 0 1vw;
+    order: 3;
+  }
+
+  /* ボタンと音量を1つの行に横並び。
+     order:4 の中で、ctrl と vol を flex で横に並べる入れ物がないので、
+     deck を flex にしたうえで、この2つを絶対配置ではなく通常フローで隣接させ、
+     さらに専用のラッパ代わりに margin で中央寄せ＋横並びに見せる */
   #as-ctrl {
     position: relative;
     left: auto; bottom: auto;
@@ -1161,75 +1169,74 @@ body {
     justify-content: center;
     align-items: center;
     gap: 3vw;
-    order: 3;
-    margin-top: 1vw;
+    order: 4;
+    display: inline-flex;
   }
   #as-ctrl button {
-    width: 12vw; max-width: 52px;    /* 横長ボタンを小さく */
-    height: 8vw;  max-height: 34px;
-    border-radius: 18px;
+    width: 11vw; max-width: 46px;
+    height: 7vw;  max-height: 30px;
+    border-radius: 16px;
   }
-  .as-btn-wrap { gap: 1.5vw; }
-  .as-btn-label { font-size: 2.4vw; }
+  .as-btn-wrap { gap: 1.2vw; }
+  .as-btn-label { font-size: 2.2vw; }
 
-  /* 音量：ボタンと同じ行に来るよう、ctrlと同じorder帯に。横一列化 */
-  #as-vol {
-    position: relative;
-    right: auto; bottom: auto;
-    order: 3;              /* ボタンと同じ order で横並びに見せる */
-    flex-direction: row;
-    margin-top: 1vw;
+  /* 音量：ボタンの右隣に来るよう order を同じにし、
+     deck の flex 方向を一時的に変えるのは難しいので、
+     ctrl と vol を横並びにする専用ラッパを作れない代わりに
+     両方を中央の同じ行に絶対配置で置く */
+/* 音量：ボタンの行に絶対配置で横並び。筐体内の右寄りに置く */
+#as-vol {
+  position: absolute;
+  right: 8vw;
+  bottom: 14vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
+  order: 0;
+  flex-direction: column;
+  margin: 0;
+  z-index: 3;
+}
+  #as-vol-dial {
+    width: 12vw; max-width: 50px;
+    height: 12vw; max-height: 50px;
   }
-  #as-vol-dial { width: 11vw; max-width: 46px; height: 11vw; max-height: 46px; }
-  #as-vol-label { display: none; }   /* VOLラベルは省いてコンパクトに */
-
-  /* プログレスバー：ボタンの前（液晶のすぐ下）に置く */
-  #as-progwrap {
-    position: relative;
-    left: auto; right: auto; bottom: auto;
-    width: 100%;
-    margin: 1vw 0;
-    order: 3;
+  /* 音量の線（マーク）：小さいダイヤルに合わせて中心・長さを調整 */
+  #as-vol-mark {
+    top: 3px;
+    width: 2.5px;
+    height: 14px;
+    transform-origin: 50% 22px;   /* 50pxダイヤルの中心まで（top3px+高さ→中心約22px） */
   }
+  #as-vol-label { font-size: 2vw; }
 
-  /* 時間表示は隠す（コンパクト化） */
+  /* 時間表示は隠す */
   #as-time { display: none; }
 
-  /* 曲リスト：筐体から下にはみ出させる。背景なし・線なし */
+  /* 曲リスト：筐体から下にはみ出す。背景なし・線なし */
   #as-tracklist {
     order: 9;
     position: relative;
     background: none;
     box-shadow: none;
     border-radius: 0;
-    /* 筐体の下端より下にはみ出す。左右いっぱいに広げる */
-    width: 112%;                 /* 筐体より少し広く */
-    margin: 6vw -6% 0;           /* 下方向・左右にはみ出す */
+    width: 100%;
+    margin: 5vw 0 0;
   }
   .as-track {
-    padding: 3.5vw 4vw;
+    padding: 3vw 2vw;
     gap: 4vw;
     flex: none;
-    border-bottom: none;         /* 境目の線をなくす */
+    border-bottom: none;
     background: none;
     transition: none;
   }
-  /* タップしても背景を変えない */
   .as-track:hover,
   .as-track:active,
-  .as-track.playing {
-    background: none;
-  }
-  /* 選択中は文字の色だけ変える */
-  .as-track.playing .t-name {
-    color: #2a8ad0;
-  }
+  .as-track.playing { background: none; }
+  .as-track.playing .t-name { color: #2a8ad0; }
   .as-track .t-num   { font-size: 3vw; width: 5vw; }
   .as-track .t-thumb { width: 11vw; height: 11vw; max-width: 48px; max-height: 48px; }
   .as-track .t-name  { font-size: 3.8vw; }
   .as-track .t-dur   { font-size: 3vw; }
 
-  /* 戻る・保存ボタンはスマホでは消す */
   #as-screen-prev,
   #as-screen-next { display: none; }
 
