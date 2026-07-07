@@ -569,6 +569,9 @@ function startAlbum(tracks){
     reflectTitleState();
     generateQR();
 
+    applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
+    screen.classList.add('show');
+
     screen.classList.add('show');
     history.pushState({ album: true }, '');   // 戻る用の履歴を積む
   };
@@ -578,6 +581,39 @@ function startAlbum(tracks){
     qrOverlay.classList.remove('show');
     screen.classList.remove('show');
     document.getElementById('wall').style.visibility = 'visible';   // 選択画面を戻す
+  }
+
+  // ===== スマホ用レイアウト並べ替え =====
+  // スマホ幅のときだけ、筐体の中を「CD」＋「液晶・ボタン・音量の横一列」にして、
+  // 曲リストを筐体の外に出す。PC/iPadでは元の配置に戻す。
+  const deckEl      = document.getElementById('as-deck');
+  const consoleEl   = document.getElementById('as-console');
+  const nowcardEl   = document.getElementById('as-nowcard');
+  const ctrlEl      = document.getElementById('as-ctrl');
+  const volEl       = document.getElementById('as-vol');
+  const panelEl     = document.getElementById('as-panel');
+  const tracklistEl = document.getElementById('as-tracklist');
+  let mobileLaidOut = false;   // 今スマホ配置になっているか
+
+  function applyMobileLayout(){
+    const isMobile = window.matchMedia('(max-width: 600px)').matches;
+
+    if (isMobile && !mobileLaidOut) {
+      // 液晶・ボタン・音量を横一列の入れ物(console)へ移動
+      consoleEl.appendChild(nowcardEl);
+      consoleEl.appendChild(ctrlEl);
+      consoleEl.appendChild(volEl);
+      // 曲リストを筐体(deck)の外＝album-screen直下へ出す
+      screen.appendChild(tracklistEl);
+      mobileLaidOut = true;
+    } else if (!isMobile && mobileLaidOut) {
+      // PC/iPadに戻すとき：元の場所へ戻す
+      panelEl.insertBefore(nowcardEl, panelEl.firstChild);  // パネルの先頭に液晶
+      panelEl.appendChild(tracklistEl);                     // パネルに曲リスト
+      deckEl.appendChild(ctrlEl);                           // 筐体にボタン
+      deckEl.appendChild(volEl);                            // 筐体に音量
+      mobileLaidOut = false;
+    }
   }
 
   // ブラウザの戻るボタンで完成画面を閉じる
@@ -786,6 +822,9 @@ function startAlbum(tracks){
     }
   });
   qrOverlay.addEventListener('click', () => qrOverlay.classList.remove('show'));
+
+  // 画面回転・リサイズでスマホ⇔PC配置を切り替える
+  window.addEventListener('resize', applyMobileLayout);
 
   function restoreFromURL(){
     const m = location.search.match(/[?&]album=([^&]+)/);
