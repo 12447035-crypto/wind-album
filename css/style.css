@@ -1163,16 +1163,17 @@ body {
      order:4 の中で、ctrl と vol を flex で横に並べる入れ物がないので、
      deck を flex にしたうえで、この2つを絶対配置ではなく通常フローで隣接させ、
      さらに専用のラッパ代わりに margin で中央寄せ＋横並びに見せる */
-  #as-ctrl {
-    position: relative;
-    left: auto; bottom: auto;
-    width: auto;
-    justify-content: center;
-    align-items: center;
-    gap: 3vw;
-    order: 4;
-    display: inline-flex;
-  }
+     #as-ctrl {
+      position: relative;
+      left: auto; bottom: auto;
+      width: 100%;
+      justify-content: flex-start;   /* 左寄せに */
+      padding-left: 6vw;             /* 左に少し余白 */
+      align-items: center;
+      gap: 3vw;
+      order: 4;
+      display: flex;
+    }
   #as-ctrl button {
     width: 11vw; max-width: 46px;
     height: 7vw;  max-height: 30px;
@@ -1189,7 +1190,7 @@ body {
 #as-vol {
   position: absolute;
   right: 8vw;
-  bottom: 14vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
+  bottom: 6vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
   order: 0;
   flex-direction: column;
   margin: 0;
