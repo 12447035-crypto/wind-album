@@ -543,6 +543,15 @@ function startAlbum(tracks){
     document.getElementById('wall').style.visibility = 'visible';
   }
 
+   // 戻る操作。QRから来た場合は選択画面に戻さない（完成画面のまま固定）
+   window.addEventListener('popstate', () => {
+    if (window.__fromQR) {
+      history.pushState({ album: true }, '');
+      return;
+    }
+    if (screen.classList.contains('show')) { closeAlbum(); }
+  });
+
   // ===== スマホ用レイアウト並べ替え（安全版） =====
   // moveInto ヘルパーで「移動先が今の親と違うときだけ」動かす。
   // 既に正しい場所にある要素を再appendして HierarchyRequestError になるのを防ぐ。
@@ -775,7 +784,10 @@ function startAlbum(tracks){
         const pm = getParam(name);
         return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
       });
-      document.getElementById('wall').style.visibility = 'hidden';
+      // QRから来た印。以降、戻る操作でも選択画面に戻さない
+      window.__fromQR = true;
+      // 選択画面を完全に消す（visibility:hiddenだと存在するので display:none に）
+      document.getElementById('wall').style.display = 'none';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
     } catch(e){ console.warn('復元に失敗', e); }
