@@ -1142,21 +1142,22 @@ body {
     height: auto;
     order: 2;
   }
+  
   #as-nowcard {
-    padding: 3vw 4vw;
+    padding: 2vw 4vw;    /* 上下の余白を小さく（3vw→2vwなど） */
     margin: 0;
   }
-  #as-name { font-size: 3.4vw; }
-  #as-num  { font-size: 2.6vw; }
-  #as-desc { font-size: 2.8vw; line-height: 1.6; margin-top: 2vw; }
+  #as-name { font-size: 3vw; }      /* 曲名を小さく */
+  #as-num  { font-size: 2.2vw; }    /* トラック番号を小さく */
+  #as-desc {
+    font-size: 2.4vw;               /* 説明文を小さく */
+    line-height: 1.4;               /* 行間も詰める（縦が縮む） */
+    margin-top: 1.5vw;              /* 説明の上の余白も小さく */
+  }
 
   /* プログレスバー：液晶の下 */
   #as-progwrap {
-    position: relative;
-    left: auto; right: auto; bottom: auto;
-    width: 100%;
-    margin: 2vw 0 1vw;
-    order: 3;
+    display: none;
   }
 
   /* ボタンと音量を1つの行に横並び。
@@ -1171,7 +1172,7 @@ body {
       padding-left: 6vw;             /* 左に少し余白 */
       align-items: center;
       gap: 3vw;
-      order: 4;
+      order: 3;
       display: flex;
     }
   #as-ctrl button {
@@ -1189,8 +1190,8 @@ body {
 /* 音量：ボタンの行に絶対配置で横並び。筐体内の右寄りに置く */
 #as-vol {
   position: absolute;
-  right: 10vw;
-  bottom: 4vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
+  right: 11vw;
+  bottom: 3vw;      /* ボタンと同じ高さに来るよう調整（実機で微調整） */
   order: 0;
   flex-direction: column;
   margin: 0;
