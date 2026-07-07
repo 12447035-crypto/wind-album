@@ -1127,8 +1127,8 @@ body {
     position: relative;
     left: auto; top: auto;
     transform: none;
-    width: 62%;
-    max-width: 300px;
+    width: 70%;          /* 62%→70% で少し大きく */
+    max-width: 340px;    /* 上限も少し上げる（300→340など） */
     margin: 1vw auto;
     order: 1;
   }
