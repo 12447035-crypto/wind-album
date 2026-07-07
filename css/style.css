@@ -1103,7 +1103,6 @@ body {
   }
   #album-screen.show { display: block; }
 
-  /* 筐体：高さは中身（CD〜音量）ぶんで固定。曲リストははみ出して外に見せる */
   #as-deck {
     position: relative;
     width: 88%;
@@ -1119,6 +1118,8 @@ body {
     gap: 3vw;
     border-radius: 32px;
     overflow: visible;
+    /* 曲リストが下に絶対配置で飛び出すので、その分の下マージンを確保 */
+    margin-bottom: 130vw;
   }
 
   /* CD */
@@ -1210,16 +1211,20 @@ body {
   /* 時間表示は隠す */
   #as-time { display: none; }
 
-  /* 曲リスト：筐体から下にはみ出す。背景なし・線なし */
   #as-tracklist {
-    order: 9;
-    position: relative;
+    position: absolute;
+    top: 100%;              /* 筐体の下端から */
+    left: 0;
+    width: 100%;
+    margin: 4vw 0 0;
     background: none;
     box-shadow: none;
     border-radius: 0;
-    width: 100%;
-    margin: 5vw 0 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
   }
+
   .as-track {
     padding: 3vw 2vw;
     gap: 4vw;
