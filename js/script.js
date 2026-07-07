@@ -36,7 +36,6 @@ const WIND_PARAMS = {
 };
 const DEFAULT_PARAM = {h:200, sat:45, strength:.4, curl:.45, dot:.5, uneri:.5, pitch:.55, dur:200, desc:''};
 
-// snd フォルダに全30風のmp3が揃ったので、audio未設定の風にも自動でパスを補完
 Object.keys(WIND_PARAMS).forEach(name => {
   if (!WIND_PARAMS[name].audio) {
     WIND_PARAMS[name].audio = 'snd/' + name + '.mp3';
@@ -53,7 +52,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   const label = document.getElementById('cf-label');
   const cards = Array.from(stage.querySelectorAll('img'));
 
-  // カードの横の間隔（layout()のxと、タップ判定のcardXで共通に使う）
   const CARD_GAP = 122;
 
   let current = 0, target = 0, wheelLock = false;
@@ -74,7 +72,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
 
   cards.forEach((c, i) => { c.dataset.index = i; });
 
-  // タップ／クリックはステージ全体で受け取り、押した位置に最も近いカードを選ぶ。
   scene.addEventListener('click', e => {
     const rect = scene.getBoundingClientRect();
     const px = e.clientX - rect.left - rect.width / 2;
@@ -135,7 +132,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     wheelLock = true; setTimeout(() => { wheelLock = false; }, 120);
   }, { passive:false });
 
-  // ---- タッチ操作：横スワイプでCDを切替 ----
   let tStartX = 0, tStartY = 0, tLastX = 0, tHorizontal = null, tBaseTarget = 0;
   const SWIPE_STEP = 45;
 
@@ -162,7 +158,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     tLastX = t.clientX;
   }, { passive: false });
 
-  // ---- 端ホバーで自動スクロール ----
   let edgeDir = 0;
   let edgeTimer = null;
   const EDGE_RATIO = 0.07;
@@ -373,9 +368,6 @@ function startAlbum(tracks){
   let ribbonSpeed = 0.02, targetRibbonSpeed = 0.02;
   let ribbonScale = 1.0,  targetRibbonScale = 1.0;
 
-  // スマホ配置フラグ
-  let mobileLaidOut = false;
-
   function deriveParams(){
     const ws = tracks.map(t => t.param);
     let noiseScale = 0, dotSize = 0, strength = 0, curl = 0;
@@ -531,9 +523,21 @@ function startAlbum(tracks){
     reflectTitleState();
     generateQR();
 
-    // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
     history.pushState({ album: true }, '');
+
+    // 完成メッセージをふわっと表示（クリック/スワイプ/5秒で消える）
+    const toast = document.getElementById('as-toast');
+    if (toast) {
+      toast.classList.remove('hide');
+      setTimeout(() => toast.classList.add('show'), 200);
+      const hideToast = () => { toast.classList.remove('show'); toast.classList.add('hide'); };
+      toast.onclick = hideToast;
+      let ty0 = 0;
+      toast.ontouchstart = e => { ty0 = e.touches[0].clientY; };
+      toast.ontouchmove  = e => { if (Math.abs(e.touches[0].clientY - ty0) > 20) hideToast(); };
+      setTimeout(hideToast, 5000);
+    }
   };
 
   function closeAlbum(){
@@ -542,60 +546,6 @@ function startAlbum(tracks){
     screen.classList.remove('show');
     document.getElementById('wall').style.visibility = 'visible';
   }
-
-   // 戻る操作。QRから来た場合は選択画面に戻さない（完成画面のまま固定）
-   window.addEventListener('popstate', () => {
-    if (window.__fromQR) {
-      history.pushState({ album: true }, '');
-      return;
-    }
-    if (screen.classList.contains('show')) { closeAlbum(); }
-  });
-
-  // ===== スマホ用レイアウト並べ替え（安全版） =====
-  // moveInto ヘルパーで「移動先が今の親と違うときだけ」動かす。
-  // 既に正しい場所にある要素を再appendして HierarchyRequestError になるのを防ぐ。
-  function applyMobileLayout(){
-    const deckEl      = document.getElementById('as-deck');
-    const consoleEl   = document.getElementById('as-console');
-    const nowcardEl   = document.getElementById('as-nowcard');
-    const ctrlEl      = document.getElementById('as-ctrl');
-    const volEl       = document.getElementById('as-vol');
-    const panelEl     = document.getElementById('as-panel');
-    const tracklistEl = document.getElementById('as-tracklist');
-    if (!deckEl || !consoleEl || !nowcardEl || !ctrlEl || !volEl || !panelEl || !tracklistEl) return;
-
-    const isMobile = window.matchMedia('(max-width: 600px)').matches;
-
-    const moveInto = (child, parent) => {
-      if (child && parent && child.parentNode !== parent) {
-        parent.appendChild(child);
-      }
-    };
-
-    if (isMobile) {
-      // スマホ：console に 液晶・ボタン・音量、album-screen 直下に曲リスト
-      moveInto(nowcardEl, consoleEl);
-      moveInto(ctrlEl, consoleEl);
-      moveInto(volEl, consoleEl);
-      moveInto(tracklistEl, screen);
-      mobileLaidOut = true;
-    } else {
-      // PC/iPad：元の場所へ戻す
-      moveInto(nowcardEl, panelEl);
-      moveInto(ctrlEl, deckEl);
-      moveInto(volEl, deckEl);
-      moveInto(tracklistEl, panelEl);
-      // パネル内の順番を整える（液晶を先頭、曲リストを後ろに）
-      if (nowcardEl.parentNode === panelEl) panelEl.insertBefore(nowcardEl, panelEl.firstChild);
-      if (tracklistEl.parentNode === panelEl) panelEl.appendChild(tracklistEl);
-      mobileLaidOut = false;
-    }
-  }
-
-  window.addEventListener('popstate', () => {
-    if (screen.classList.contains('show')) { closeAlbum(); }
-  });
 
   function loadTrack(){
     const t = tracks[cur];
@@ -744,9 +694,9 @@ function startAlbum(tracks){
     if (v.length === 0) return;
     titleIn.value = v.endsWith('。') ? v : v + '。';
     titleIn.classList.add('confirmed');
-    titleIn.classList.remove('is-empty');      // 確定したら枠と点滅を消す
-    screenNext.disabled = false;               // 確定したら「次へ」を押せるように
-    screenNext.classList.remove('has-text');   // グレー点滅を解除
+    titleIn.classList.remove('is-empty');
+    screenNext.disabled = false;
+    screenNext.classList.remove('has-text');
     titleIn.blur();
     titleIn.classList.add('just-confirmed');
     setTimeout(() => titleIn.classList.remove('just-confirmed'), 600);
@@ -770,7 +720,13 @@ function startAlbum(tracks){
       history.back();
     }
   });
-  qrOverlay.addEventListener('click', () => qrOverlay.classList.remove('show'));
+
+  // QRの外側を押したら、最初の選択画面から開き直す（次の人のため）
+  qrOverlay.addEventListener('click', (e) => {
+    // カード自体（QR画像）を押したときは閉じない。外側だけ反応
+    if (e.target.closest('#as-qr-card')) return;
+    location.href = location.href.split('?')[0].split('#')[0];
+  });
 
   function restoreFromURL(){
     const m = location.search.match(/[?&]album=([^&]+)/);
@@ -784,18 +740,13 @@ function startAlbum(tracks){
         const pm = getParam(name);
         return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
       });
-      // QRから来た印。以降、戻る操作でも選択画面に戻さない
       window.__fromQR = true;
-      // 選択画面を完全に消す（visibility:hiddenだと存在するので display:none に）
       document.getElementById('wall').style.display = 'none';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
     } catch(e){ console.warn('復元に失敗', e); }
   }
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
-
-  // 画面回転・リサイズでスマホ⇔PC配置を切り替える
-  // window.addEventListener('resize', applyMobileLayout);
 })();
 
 if ('scrollRestoration' in history) {

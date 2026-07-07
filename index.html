@@ -1,82 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
-
- <head>
+<head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>風のオムニバスアルバム</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.js"
-    integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
- </head>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
- <body>
   <div id="wall">
-    <div id="cf-maketitle">思い出の風を、集めてみよう。</div>
-    <div id="cf-makesub">
-      気になった風を聴いて、5つ選びましょう。
-      <br> 集まった風は、あなただけのアルバムになります。
-    </div>
+    <!-- ===== 選ぶ画面（3Dカバーフロー） ===== -->
+    <h1 id="cf-maketitle">思い出の風を、集めてみよう。</h1>
+    <p id="cf-makesub">気になった風を聴いて、5つ選びましょう。<br>あなただけの風のアルバムができあがります。</p>
 
-    <!-- 3Dカバーフロー（全30風） -->
     <div id="coverflow">
-      <div id="cf-label"></div>
       <div id="cf-scene">
         <div id="cf-stage">
-          <img src="img/北風.png" alt="北風" data-name="北風">
-          <img src="img/山風.png" alt="山風" data-name="山風">
-          <img src="img/海風.png" alt="海風" data-name="海風">
-          <img src="img/川風.png" alt="川風" data-name="川風">
-          <img src="img/潮風.png" alt="潮風" data-name="潮風">
-          <img src="img/向かい風.png" alt="向かい風" data-name="向かい風">
-          <img src="img/追い風.png" alt="追い風" data-name="追い風">
-          <img src="img/熱風.png" alt="熱風" data-name="熱風">
-          <img src="img/野風.png" alt="野風" data-name="野風">
-          <img src="img/清風.png" alt="清風" data-name="清風">
-          <img src="img/そよ風.png" alt="そよ風" data-name="そよ風">
-          <img src="img/biru.png" alt="ビル風" data-name="ビル風">
-          <img src="img/雨風.png" alt="雨風" data-name="雨風">
-          <img src="img/朝風.png" alt="朝風" data-name="朝風">
-          <img src="img/夕風.png" alt="夕風" data-name="夕風">
-          <img src="img/夜風.png" alt="夜風" data-name="夜風">
-          <img src="img/春風.png" alt="春風" data-name="春風">
-          <img src="img/花風.png" alt="花風" data-name="花風">
-          <img src="img/春一番.png" alt="春一番" data-name="春一番">
-          <img src="img/木の芽風.png" alt="木の芽風" data-name="木の芽風">
-          <img src="img/青嵐.png" alt="青嵐" data-name="青嵐">
-          <img src="img/若葉風.png" alt="若葉風" data-name="若葉風">
-          <img src="img/黒南風.png" alt="黒南風" data-name="黒南風">
-          <img src="img/涼風.png" alt="涼風" data-name="涼風">
-          <img src="img/初嵐.png" alt="初嵐" data-name="初嵐">
-          <img src="img/秋風.png" alt="秋風" data-name="秋風">
-          <img src="img/悲風.png" alt="悲風" data-name="悲風">
-          <img src="img/寒風.png" alt="寒風" data-name="寒風">
-          <img src="img/木枯らし.png" alt="木枯らし" data-name="木枯らし">
-          <img src="img/隙間風.png" alt="隙間風" data-name="隙間風">
+          <img src="img/北風.png"     data-name="北風"     alt="北風">
+          <img src="img/山風.png"     data-name="山風"     alt="山風">
+          <img src="img/海風.png"     data-name="海風"     alt="海風">
+          <img src="img/川風.png"     data-name="川風"     alt="川風">
+          <img src="img/潮風.png"     data-name="潮風"     alt="潮風">
+          <img src="img/向かい風.png" data-name="向かい風" alt="向かい風">
+          <img src="img/追い風.png"   data-name="追い風"   alt="追い風">
+          <img src="img/熱風.png"     data-name="熱風"     alt="熱風">
+          <img src="img/野風.png"     data-name="野風"     alt="野風">
+          <img src="img/清風.png"     data-name="清風"     alt="清風">
+          <img src="img/そよ風.png"   data-name="そよ風"   alt="そよ風">
+          <img src="img/biru.png"     data-name="ビル風"   alt="ビル風">
+          <img src="img/雨風.png"     data-name="雨風"     alt="雨風">
+          <img src="img/朝風.png"     data-name="朝風"     alt="朝風">
+          <img src="img/夕風.png"     data-name="夕風"     alt="夕風">
+          <img src="img/夜風.png"     data-name="夜風"     alt="夜風">
+          <img src="img/春風.png"     data-name="春風"     alt="春風">
+          <img src="img/花風.png"     data-name="花風"     alt="花風">
+          <img src="img/春一番.png"   data-name="春一番"   alt="春一番">
+          <img src="img/木の芽風.png" data-name="木の芽風" alt="木の芽風">
+          <img src="img/青嵐.png"     data-name="青嵐"     alt="青嵐">
+          <img src="img/若葉風.png"   data-name="若葉風"   alt="若葉風">
+          <img src="img/黒南風.png"   data-name="黒南風"   alt="黒南風">
+          <img src="img/涼風.png"     data-name="涼風"     alt="涼風">
+          <img src="img/初嵐.png"     data-name="初嵐"     alt="初嵐">
+          <img src="img/秋風.png"     data-name="秋風"     alt="秋風">
+          <img src="img/悲風.png"     data-name="悲風"     alt="悲風">
+          <img src="img/寒風.png"     data-name="寒風"     alt="寒風">
+          <img src="img/木枯らし.png" data-name="木枯らし" alt="木枯らし">
+          <img src="img/隙間風.png"   data-name="隙間風"   alt="隙間風">
         </div>
       </div>
+      <div id="cf-label"></div>
     </div>
 
-    <!-- ===== 選択中の風：説明＋試聴＋追加（中央下にまとめて常設） ===== -->
+    <!-- コントロール -->
     <div id="cf-controls">
       <div id="cf-now">
-        <div id="cf-detail-name">追い風。</div>
-        <div id="cf-detail-desc">後ろから吹いてくる風。</div>
+        <div id="cf-detail-name">—</div>
+        <div id="cf-detail-desc">—</div>
       </div>
 
       <div id="cf-detail-player">
-        <!-- 試聴用の音声 -->
-        <audio id="cf-audio"></audio>
         <button id="cf-play" aria-label="試聴">
-          <svg viewBox="0 0 56 56" width="56" height="56">
-            <circle cx="28" cy="28" r="26"></circle>
-            <polygon class="cf-play-icon" points="23,19 23,37 38,28"></polygon>
+          <svg viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="25"></circle>
+            <polygon class="cf-play-icon" points="20,16 20,36 38,26"></polygon>
             <g class="cf-pause-icon">
-              <rect x="22" y="19" width="4" height="18"></rect>
-              <rect x="30" y="19" width="4" height="18"></rect>
+              <rect x="19" y="17" width="5" height="18"></rect>
+              <rect x="28" y="17" width="5" height="18"></rect>
             </g>
           </svg>
         </button>
@@ -89,18 +78,27 @@
       <button id="cf-add">add</button>
 
       <div id="cf-slots"></div>
-      <button id="cf-confirm">このアルバムを完成させる</button>
+
+      <button id="cf-confirm">アルバムを完成させる</button>
     </div>
+
+    <audio id="cf-audio"></audio>
   </div>
 
   <!-- ===== ロード画面 ===== -->
   <div id="album-loading">
     <div class="al-spinner"></div>
-    <div class="al-text">アルバムを作成しています…</div>
+    <div class="al-text">あなたの風を集めています…</div>
   </div>
 
-  <!-- ===== 完成画面（CDプレイヤー筐体） ===== -->
+  <!-- ===== 完成画面 ===== -->
   <div id="album-screen">
+
+    <!-- 完成メッセージ（上からふわっと。スワイプ/クリックで消える） -->
+    <div id="as-toast">
+      <div id="as-toast-text">あなたの風のアルバムが完成しました。<br>タイトルを決めましょう。</div>
+    </div>
+
     <div id="as-deck">
       <!-- 完成画面の再生用の音声 -->
       <audio id="as-audio"></audio>
@@ -110,7 +108,7 @@
         <div id="as-disc-rot">
           <div id="as-disc-canvas"></div>
         </div>
-        <input id="as-title" type="text" value="" size="8" placeholder="title。" title="クリックでタイトルを編集（停止中のみ）">
+        <input id="as-title" type="text" value="" size="8" placeholder="タイトル入力。" title="クリックでタイトルを編集（停止中のみ）">
         <div id="as-hole"></div>
       </div>
 
@@ -127,8 +125,6 @@
           </div>
           <div id="as-desc">—</div>
         </div>
-        <!-- 選んだ曲リスト -->
-        <div id="as-tracklist"></div>
       </div>
 
       <!-- 下：プログレスバー -->
@@ -152,8 +148,8 @@
         </div>
       </div>
 
-       <!-- 音量ダイヤル -->
-       <div id="as-vol" title="ドラッグで音量調整">
+      <!-- 音量ダイヤル -->
+      <div id="as-vol" title="ドラッグで音量調整">
         <div id="as-vol-dial">
           <div id="as-vol-mark"></div>
         </div>
@@ -192,7 +188,9 @@
     </div>
   </div>
 
+  <!-- ライブラリ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="js/script.js"></script>
- </body>
-
+</body>
 </html>
