@@ -1213,7 +1213,7 @@ body {
 
   #as-tracklist {
     position: absolute;
-    top: 200%;              /* 筐体の下端から */
+    top: 300%;              /* 筐体の下端から */
     left: 0;
     width: 100%;
     background: none;
