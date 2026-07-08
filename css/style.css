@@ -1291,8 +1291,8 @@ body {
   animation: toastFade 3s ease forwards;
 }
 @keyframes toastFade {
-  0%   { opacity: 0; transform: translate(-50%, -46%); }
-  15%  { opacity: 1; transform: translate(-50%, -50%); }   /* フワッと出る */
-  75%  { opacity: 1; transform: translate(-50%, -50%); }   /* しばらく表示 */
-  100% { opacity: 0; transform: translate(-50%, -54%); }   /* フワッと消える */
+  0%   { opacity: 0; transform: translate(-50%, -42%); }
+  20%  { opacity: 1; transform: translate(-50%, -50%); }   /* ゆっくりフワッと出る */
+  70%  { opacity: 1; transform: translate(-50%, -50%); }   /* 表示キープ */
+  100% { opacity: 0; transform: translate(-50%, -58%); }   /* ゆっくりフワッと消える */
 }
