@@ -846,25 +846,18 @@ function startAlbum(tracks){
     stopPlay();
     generateQR();
     qrOverlay.classList.add('show');
-  });
-  screenPrev.addEventListener('click', () => {
-    if (qrOverlay.classList.contains('show')) {
-      qrOverlay.classList.remove('show');
-    } else {
-      history.back();
-    }
-  });
-  screenNext.addEventListener('click', () => {
-    if (screenNext.disabled) return;
-    stopPlay();
-    generateQR();
-    qrOverlay.classList.add('show');
     // QR表示から30秒後、自動で最初の選択画面に戻す（次の人のため）
     setTimeout(() => {
       if (qrOverlay.classList.contains('show')) {
         location.href = location.href.split('?')[0].split('#')[0];
       }
     }, 30000);
+    // QRの外側を指でタップしたら、最初の選択画面に戻す
+  qrOverlay.addEventListener('click', (e) => {
+    // QRカード（白い枠の中）を押したときは戻らない。外側だけ
+    if (e.target.closest('#as-qr-card')) return;
+    location.href = location.href.split('?')[0].split('#')[0];
+  });
   });
 
   function restoreFromURL(){
