@@ -534,6 +534,7 @@ function startAlbum(tracks){
     // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
     history.pushState({ album: true }, '');
+    
   };
 
   function closeAlbum(){

@@ -1256,3 +1256,38 @@ body {
     max-width: 280px; max-height: 280px;
   }
 }
+
+/* 完成メッセージ（中央にフワッと出て自動で消える。JS不要） */
+#as-toast {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 24px 40px;
+  border-radius: 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  /* 最初は隠れていて、完成画面が出たとき下のアニメで表示→消える */
+}
+#as-toast-text {
+  font-size: 14px;
+  color: #3a4250;
+  letter-spacing: 0.08em;
+  line-height: 2;
+  text-align: center;
+}
+
+/* 完成画面が表示されたら、トーストを自動で「フワッと出て消える」 */
+#album-screen.show #as-toast {
+  animation: toastFade 4.5s ease forwards;
+}
+@keyframes toastFade {
+  0%   { opacity: 0; transform: translate(-50%, -46%); }
+  15%  { opacity: 1; transform: translate(-50%, -50%); }   /* フワッと出る */
+  75%  { opacity: 1; transform: translate(-50%, -50%); }   /* しばらく表示 */
+  100% { opacity: 0; transform: translate(-50%, -54%); }   /* フワッと消える */
+}
