@@ -547,7 +547,7 @@ function startAlbum(tracks){
     toast.ontouchmove  = e => { if (Math.abs(e.touches[0].clientY - ty0) > 20) hideToast(); };
     setTimeout(hideToast, 5000);
   }
-};
+
 
   function closeAlbum(){
     stopPlay();
