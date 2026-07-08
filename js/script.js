@@ -260,7 +260,9 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           '<span class="num">'+(i+1)+'</span>' +
           '<div class="thumb"><img src="'+card.getAttribute('src')+'" alt=""></div>' +
           '<span class="rm" data-slot="'+i+'">×</span>' +
-          '<span class="nm">'+card.dataset.name+'</span>';
+          '<span class="nm">'+card.dataset.name+'</span>' +
+          '<span class="mv mv-left" data-slot="'+i+'">‹</span>' +
+          '<span class="mv mv-right" data-slot="'+i+'">›</span>';
         div.querySelector('.rm').addEventListener('click', ev => {
           ev.stopPropagation();
           picked.splice(i, 1);
@@ -271,6 +273,26 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           ev.stopPropagation();
           target = ci;
         });
+        // 左の矢印：一つ前と入れ替え
+        const left = div.querySelector('.mv-left');
+        if (i === 0) { left.classList.add('disabled'); }
+        else {
+          left.addEventListener('click', ev => {
+            ev.stopPropagation();
+            [picked[i-1], picked[i]] = [picked[i], picked[i-1]];
+            renderSlots();
+          });
+        }
+        // 右の矢印：一つ後と入れ替え
+        const right = div.querySelector('.mv-right');
+        if (i >= picked.length - 1) { right.classList.add('disabled'); }
+        else {
+          right.addEventListener('click', ev => {
+            ev.stopPropagation();
+            [picked[i+1], picked[i]] = [picked[i], picked[i+1]];
+            renderSlots();
+          });
+        }
       } else { div.innerHTML = '<span class="num">'+(i+1)+'</span>'; }
       slotsEl.appendChild(div);
     }
