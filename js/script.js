@@ -256,7 +256,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
       const ci = picked[i];
       if (ci !== undefined){
         const card = cards[ci]; div.classList.add('filled');
-        div.dataset.pos = i;   // このスロットが picked の何番目か
         div.innerHTML =
           '<span class="num">'+(i+1)+'</span>' +
           '<div class="thumb"><img src="'+card.getAttribute('src')+'" alt=""></div>' +
@@ -272,8 +271,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           ev.stopPropagation();
           target = ci;
         });
-        // ドラッグで並べ替え（マウス・タッチ両対応）
-        enableDragReorder(div, i);
       } else { div.innerHTML = '<span class="num">'+(i+1)+'</span>'; }
       slotsEl.appendChild(div);
     }
