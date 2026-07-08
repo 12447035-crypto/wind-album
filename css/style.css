@@ -395,7 +395,13 @@ body {
   text-align: center;
   letter-spacing: 0 !important;
   cursor: pointer;
-  z-index: 3;
+  z-index: 5;
+  /* 記号を中央に置く */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
 }
 
 #cf-confirm {
@@ -1312,9 +1318,15 @@ body {
   letter-spacing: 0 !important;
   cursor: pointer;
   z-index: 4;
+  /* 記号を中央に置く */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
 }
-#cf-slots .slot .mv-left  { left: 2px; }
-#cf-slots .slot .mv-right { right: 2px; }
+#cf-slots .slot .mv-left  { left: 4px; }
+#cf-slots .slot .mv-right { right: 4px; }
 #cf-slots .slot .mv.disabled {
   opacity: 0;
   pointer-events: none;
