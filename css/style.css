@@ -1275,7 +1275,7 @@ body {
 }
 #as-toast-text {
   font-size: 14px;
-  color: #3a4250;
+  color: #727171; 
   letter-spacing: 0.08em;
   line-height: 2;
   text-align: center;
@@ -1283,7 +1283,7 @@ body {
 
 /* 完成画面が表示されたら、トーストを自動で「フワッと出て消える」 */
 #album-screen.show #as-toast {
-  animation: toastFade 4.5s ease forwards;
+  animation: toastFade 3s ease forwards;
 }
 @keyframes toastFade {
   0%   { opacity: 0; transform: translate(-50%, -46%); }
