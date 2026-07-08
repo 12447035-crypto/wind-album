@@ -626,6 +626,14 @@ function startAlbum(tracks){
     screen.classList.remove('show');
     document.getElementById('wall').style.visibility = 'visible';
   }
+  
+  screenPrev.addEventListener('click', () => {
+    if (qrOverlay.classList.contains('show')) {
+      qrOverlay.classList.remove('show');
+    } else {
+      closeAlbum();
+    }
+  });
 
    // 戻る操作。QRから来た場合は選択画面に戻さない（完成画面のまま固定）
    window.addEventListener('popstate', () => {
