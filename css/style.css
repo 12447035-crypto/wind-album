@@ -1094,6 +1094,10 @@ body {
 /* 要素は一切動かさず、絶対配置を解除して縦に流し込む         */
 /* ========================================================== */
 @media (max-width: 600px) {
+  /* スマホでは完成メッセージ（トースト）を出さない */
+  #as-toast {
+    display: none;
+  }
 
   #album-screen {
     padding: 18vw 5vw 16vw;
@@ -1279,6 +1283,7 @@ body {
   letter-spacing: 0.08em;
   line-height: 2;
   text-align: center;
+  text-shadow: 0 1px 4px rgba(74, 73, 73, 0.45);
 }
 
 /* 完成画面が表示されたら、トーストを自動で「フワッと出て消える」 */
