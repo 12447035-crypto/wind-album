@@ -329,8 +329,8 @@ body {
 }
 
 #cf-slots .slot {
-  width: 88px;
-  height: 104px;
+  width: 78px;
+  height: 92px;
   border-radius: 8px;
   border: 1.5px dashed rgba(120, 120, 120, 0.5);
   background: rgba(255, 255, 255, 0.55);
