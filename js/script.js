@@ -902,11 +902,3 @@ window.addEventListener('load', () => {
   }
 });
 
-// iPadでキーボードが出るとき、完成画面を少し上にずらして
-  // 左右のボタン（戻る・保存）が隠れないようにする
-  titleIn.addEventListener('focus', () => {
-    document.getElementById('as-deck').style.transform = 'translateY(-12vh)';
-  });
-  titleIn.addEventListener('blur', () => {
-    document.getElementById('as-deck').style.transform = '';
-  });
