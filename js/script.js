@@ -537,7 +537,7 @@ function startAlbum(tracks){
   };
   // 完成メッセージをふわっと表示（QRから来たときは出さない）
   const toast = document.getElementById('as-toast');
-  if (toast && !window.__fromQR) {
+    if (toast && !location.search.match(/[?&]album=/)) {
     toast.classList.remove('hide');
     setTimeout(() => toast.classList.add('show'), 200);
     const hideToast = () => { toast.classList.remove('show'); toast.classList.add('hide'); };
