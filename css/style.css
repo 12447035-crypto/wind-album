@@ -528,6 +528,11 @@ body {
   border-radius: 50%;
   overflow: hidden;
   will-change: transform;
+  /* Safari対策：回転時に縁が欠けないよう円形マスクで確実に切り抜く */
+  -webkit-mask-image: radial-gradient(circle, #fff 99.5%, transparent 100%);
+  mask-image: radial-gradient(circle, #fff 99.5%, transparent 100%);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 #as-disc-canvas {
@@ -1051,6 +1056,11 @@ body {
 
 #as-screen-next:not(:disabled) .next-ring {
   border-color: #2a8ad0;
+  animation: nextBlinkBlue 1.2s ease-in-out infinite;
+}
+@keyframes nextBlinkBlue {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
 }
 #as-screen-next:not(:disabled) svg .phone-body,
 #as-screen-next:not(:disabled) svg .phone-line,
