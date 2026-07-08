@@ -803,7 +803,7 @@ function startAlbum(tracks){
       // QRから来た印。以降、戻る操作でも選択画面に戻さない
       window.__fromQR = true;
       // 選択画面を完全に消す（visibility:hiddenだと存在するので display:none に）
-      document.getElementById('wall').style.display = 'hidden';
+      document.getElementById('wall').style.display = 'none';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
     } catch(e){ console.warn('復元に失敗', e); }
