@@ -532,7 +532,11 @@ function startAlbum(tracks){
     generateQR();
 
     // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
-screen.classList.add('show');
+    screen.classList.add('show');
+    history.pushState({ album: true }, '');
+  };
+
+  screen.classList.add('show');
     history.pushState({ album: true }, '');
 
     // 完成メッセージをふわっと表示（QRから来たときは出さない）
@@ -796,14 +800,14 @@ screen.classList.add('show');
         const pm = getParam(name);
         return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
       });
-      // QRから来た印。トーストを出さない・選択画面を完全に消す
+      // QRから来た印。以降、戻る操作でも選択画面に戻さない
       window.__fromQR = true;
+      // 選択画面を完全に消す（visibility:hiddenだと存在するので display:none に）
       document.getElementById('wall').style.display = 'none';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
     } catch(e){ console.warn('復元に失敗', e); }
   }
-  
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
 
   // 画面回転・リサイズでスマホ⇔PC配置を切り替える
