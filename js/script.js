@@ -256,6 +256,7 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
       const ci = picked[i];
       if (ci !== undefined){
         const card = cards[ci]; div.classList.add('filled');
+        div.dataset.pos = i;   // このスロットが picked の何番目か
         div.innerHTML =
           '<span class="num">'+(i+1)+'</span>' +
           '<div class="thumb"><img src="'+card.getAttribute('src')+'" alt=""></div>' +
@@ -271,6 +272,8 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           ev.stopPropagation();
           target = ci;
         });
+        // ドラッグで並べ替え（マウス・タッチ両対応）
+        enableDragReorder(div, i);
       } else { div.innerHTML = '<span class="num">'+(i+1)+'</span>'; }
       slotsEl.appendChild(div);
     }
@@ -281,6 +284,67 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
         confirmBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
+  }
+
+  // ===== スロットのドラッグ並べ替え（マウス／iPadタッチ両対応） =====
+  function enableDragReorder(slotEl, fromPos){
+    let dragging = false;
+    let startX = 0;
+    let ghost = null;      // ドラッグ中に指について動く見た目のコピー
+
+    // 座標取り出し（マウス・タッチ両対応）
+    const getX = e => (e.touches && e.touches.length) ? e.touches[0].clientX
+                    : (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientX
+                    : e.clientX;
+
+    const onDown = e => {
+      // ×ボタンやサムネの上から始まったドラッグは無視（削除・選択を優先）
+      if (e.target.closest('.rm')) return;
+      dragging = true;
+      startX = getX(e);
+      slotEl.classList.add('dragging');
+      if (e.type === 'touchstart') e.preventDefault();
+    };
+
+    const onMove = e => {
+      if (!dragging) return;
+      const x = getX(e);
+      // ドラッグ中のスロットを指の動きに合わせて少し動かす（視覚フィードバック）
+      slotEl.style.transform = 'translateX(' + (x - startX) + 'px) scale(1.05)';
+      slotEl.style.zIndex = 100;
+      // 今、指がどのスロットの上にあるか調べて、そこと入れ替える
+      const slots = Array.from(slotsEl.querySelectorAll('.slot.filled'));
+      for (const other of slots) {
+        if (other === slotEl) continue;
+        const r = other.getBoundingClientRect();
+        if (x > r.left && x < r.right) {
+          const toPos = parseInt(other.dataset.pos, 10);
+          if (!isNaN(toPos) && toPos !== fromPos) {
+            // picked 配列の順番を入れ替える
+            const moved = picked.splice(fromPos, 1)[0];
+            picked.splice(toPos, 0, moved);
+            renderSlots();   // 並べ替えて再描画
+            return;          // 再描画で要素が作り直されるのでここで終了
+          }
+        }
+      }
+      if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      slotEl.classList.remove('dragging');
+      slotEl.style.transform = '';
+      slotEl.style.zIndex = '';
+    };
+
+    slotEl.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    slotEl.addEventListener('touchstart', onDown, { passive:false });
+    window.addEventListener('touchmove', onMove, { passive:false });
+    window.addEventListener('touchend', onUp);
   }
 
   confirmBtn.addEventListener('click', e => {
