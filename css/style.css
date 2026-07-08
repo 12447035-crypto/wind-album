@@ -1088,7 +1088,7 @@ body {
 /* 完成時の説明トースト（上からふわっと。クリック/スワイプで消える） */
 #as-toast {
   position: fixed;
-  top: 24px;
+  top: 25px;
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
   z-index: 10001;
