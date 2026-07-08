@@ -532,11 +532,10 @@ function startAlbum(tracks){
     generateQR();
 
     // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
-    screen.classList.add('show');
     history.pushState({ album: true }, '');
   };
   // 完成メッセージをふわっと表示（QRから来たときは出さない）
-  const toast = document.getElementById('as-toast');
+  const toscreen.classList.add('show');ast = document.getElementById('as-toast');
     if (toast) {
     toast.classList.remove('hide');
     setTimeout(() => toast.classList.add('show'), 200);
@@ -547,7 +546,6 @@ function startAlbum(tracks){
     toast.ontouchmove  = e => { if (Math.abs(e.touches[0].clientY - ty0) > 20) hideToast(); };
     setTimeout(hideToast, 5000);
   }
-
 
   function closeAlbum(){
     stopPlay();
