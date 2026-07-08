@@ -249,41 +249,96 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   });
   cfAudio.addEventListener('ended', () => { stopPreview(); setProgress(0); });
 
-  function renderSlots(){
-    slotsEl.innerHTML = '';
-    for (let i = 0; i < MAX; i++){
-      const div = document.createElement('div'); div.className = 'slot';
+  function enableDragReorder(slotEl, fromPos){
+    let dragging = false;
+    let startX = 0, startY = 0;
+    let curPos = fromPos;   // ドラッグ中の現在位置（動的に変わる）
+
+    const getXY = e => {
+      if (e.touches && e.touches.length) return { x:e.touches[0].clientX, y:e.touches[0].clientY };
+      if (e.changedTouches && e.changedTouches.length) return { x:e.changedTouches[0].clientX, y:e.changedTouches[0].clientY };
+      return { x:e.clientX, y:e.clientY };
+    };
+
+    const onDown = e => {
+      if (e.target.closest('.rm')) return;
+      dragging = true;
+      curPos = parseInt(slotEl.dataset.pos, 10);
+      const p = getXY(e);
+      startX = p.x; startY = p.y;
+      slotEl.classList.add('dragging');   // 持ち上がる見た目（CSS）
+      if (e.type === 'touchstart') e.preventDefault();
+    };
+
+    const onMove = e => {
+      if (!dragging) return;
+      const p = getXY(e);
+      const dx = p.x - startX;
+      const dy = p.y - startY;
+      // 掴んだカードは指にしっかりついて動く（持ち上げ感）
+      slotEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(1.12) rotate(2deg)';
+      slotEl.style.zIndex = 200;
+
+      // 指の位置が別のスロットに入ったら、picked を入れ替えて curPos 更新
+      const slots = Array.from(slotsEl.querySelectorAll('.slot.filled'));
+      for (const other of slots) {
+        if (other === slotEl) continue;
+        const r = other.getBoundingClientRect();
+        if (p.x > r.left && p.x < r.right) {
+          const toPos = parseInt(other.dataset.pos, 10);
+          if (!isNaN(toPos) && toPos !== curPos) {
+            const moved = picked.splice(curPos, 1)[0];
+            picked.splice(toPos, 0, moved);
+            curPos = toPos;
+            // 掴んでいるカード以外だけ位置を更新（掴んでるカードは持ったまま）
+            refreshSlotsKeepDrag(slotEl, curPos, startX, startY, dx, dy);
+          }
+          break;
+        }
+      }
+      if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      slotEl.classList.remove('dragging');
+      slotEl.style.transform = '';
+      slotEl.style.zIndex = '';
+      renderSlots();   // 最後にきれいに並べ直す
+    };
+
+    slotEl.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    slotEl.addEventListener('touchstart', onDown, { passive:false });
+    window.addEventListener('touchmove', onMove, { passive:false });
+    window.addEventListener('touchend', onUp);
+  }
+
+  // 並べ替え中、他のスロットだけ番号・中身を更新し、掴んでいるカードは持ったまま保つ
+  function refreshSlotsKeepDrag(dragEl, dragPos, startX, startY, dx, dy){
+    const slots = Array.from(slotsEl.querySelectorAll('.slot'));
+    slots.forEach((div, i) => {
+      if (div === dragEl) return;   // 掴んでいるカードは触らない
       const ci = picked[i];
       if (ci !== undefined){
-        const card = cards[ci]; div.classList.add('filled');
-        div.dataset.pos = i;   // このスロットが picked の何番目か
-        div.innerHTML =
-          '<span class="num">'+(i+1)+'</span>' +
-          '<div class="thumb"><img src="'+card.getAttribute('src')+'" alt=""></div>' +
-          '<span class="rm" data-slot="'+i+'">×</span>' +
-          '<span class="nm">'+card.dataset.name+'</span>';
-        div.querySelector('.rm').addEventListener('click', ev => {
-          ev.stopPropagation();
-          picked.splice(i, 1);
-          renderSlots();
-          if (shownIndex >= 0) updateAddBtn(shownIndex);
-        });
-        div.querySelector('.thumb').addEventListener('click', ev => {
-          ev.stopPropagation();
-          target = ci;
-        });
-        // ドラッグで並べ替え（マウス・タッチ両対応）
-        enableDragReorder(div, i);
-      } else { div.innerHTML = '<span class="num">'+(i+1)+'</span>'; }
-      slotsEl.appendChild(div);
-    }
-    const justCompleted = (picked.length === MAX) && !confirmBtn.classList.contains('show');
-    confirmBtn.classList.toggle('show', picked.length === MAX);
-    if (justCompleted) {
-      setTimeout(() => {
-        confirmBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
+        const card = cards[ci];
+        div.classList.add('filled');
+        div.dataset.pos = i;
+        const nm = div.querySelector('.nm');
+        const img = div.querySelector('.thumb img');
+        const num = div.querySelector('.num');
+        if (num) num.textContent = (i+1);
+        if (nm) nm.textContent = card.dataset.name;
+        if (img) img.src = card.getAttribute('src');
+        div.style.transform = '';
+      }
+    });
+    // 掴んでいるカードの番号だけ更新
+    const dragNum = dragEl.querySelector('.num');
+    if (dragNum) dragNum.textContent = (dragPos+1);
+    dragEl.dataset.pos = dragPos;
   }
 
   // ===== スロットのドラッグ並べ替え（マウス／iPadタッチ両対応） =====
