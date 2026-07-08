@@ -1306,3 +1306,26 @@ body {
   cursor: grab;
   transition: transform 0.2s ease;   /* 他のカードが空ける動きを滑らかに */
 }
+
+#cf-slots .slot .mv {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  line-height: 14px;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #3a4250;
+  font-size: 11px;
+  letter-spacing: 0 !important;
+  cursor: pointer;
+  z-index: 4;
+}
+#cf-slots .slot .mv-left  { left: 2px; }
+#cf-slots .slot .mv-right { right: 2px; }
+#cf-slots .slot .mv.disabled {
+  opacity: 0;
+  pointer-events: none;
+}
