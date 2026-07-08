@@ -1296,3 +1296,13 @@ body {
   70%  { opacity: 1; transform: translate(-50%, -50%); }   /* 表示キープ */
   100% { opacity: 0; transform: translate(-50%, -58%); }   /* ゆっくりフワッと消える */
 }
+
+#cf-slots .slot.dragging {
+  cursor: grabbing;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);   /* 浮いた影 */
+  transition: none;   /* ドラッグ中は指に即追従 */
+}
+#cf-slots .slot.filled {
+  cursor: grab;
+  transition: transform 0.2s ease;   /* 他のカードが空ける動きを滑らかに */
+}
