@@ -628,6 +628,13 @@ function showToastMessage(msg){
     }
   });
 
+  qrOverlay.addEventListener('click', (e) => {
+    if (e.target === qrOverlay) {
+      window.__fromQR = false;
+      closeAlbum();
+    }
+  })
+
    // 戻る操作。QRから来た場合は選択画面に戻さない（完成画面のまま固定）
    window.addEventListener('popstate', () => {
     if (window.__fromQR) {
