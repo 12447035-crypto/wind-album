@@ -867,6 +867,18 @@ function showToastMessage(msg){
   });
   titleIn.addEventListener('blur', confirmTitle);
 
+  // 再生中にタイトルをクリックしたら、再生を止めて編集できるようにする
+document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
+  if (!playing) return; // 再生中でなければ何もしない(通常のクリックはtitleIn自身が処理する)
+  const r = titleIn.getBoundingClientRect();
+  if (e.clientX >= r.left && e.clientX <= r.right &&
+      e.clientY >= r.top  && e.clientY <= r.bottom) {
+    stopPlay();      // 再生停止(この中でupdateTitleEditable()が呼ばれ、編集可能状態になる)
+    updatePlayer();  // 曲名や時間表示を停止状態に合わせて更新
+    setTimeout(() => { titleIn.focus(); }, 50); // 停止処理の反映を待ってからフォーカス
+  }
+});
+
   screenNext.addEventListener('click', () => {
     // locked（未確定）なら、専用トーストでメッセージを出す
     if (screenNext.classList.contains('locked')) {
