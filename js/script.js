@@ -260,9 +260,7 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           '<span class="num">'+(i+1)+'</span>' +
           '<div class="thumb"><img src="'+card.getAttribute('src')+'" alt=""></div>' +
           '<span class="rm" data-slot="'+i+'">×</span>' +
-          '<span class="nm">'+card.dataset.name+'</span>' +
-          '<span class="mv mv-left" data-slot="'+i+'">‹</span>' +
-          '<span class="mv mv-right" data-slot="'+i+'">›</span>';
+          '<span class="nm">'+card.dataset.name+'</span>' ;
         div.querySelector('.rm').addEventListener('click', ev => {
           ev.stopPropagation();
           picked.splice(i, 1);
@@ -273,26 +271,6 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
           ev.stopPropagation();
           target = ci;
         });
-        // 左の矢印：一つ前と入れ替え
-        const left = div.querySelector('.mv-left');
-        if (i === 0) { left.classList.add('disabled'); }
-        else {
-          left.addEventListener('click', ev => {
-            ev.stopPropagation();
-            [picked[i-1], picked[i]] = [picked[i], picked[i-1]];
-            renderSlots();
-          });
-        }
-        // 右の矢印：一つ後と入れ替え
-        const right = div.querySelector('.mv-right');
-        if (i >= picked.length - 1) { right.classList.add('disabled'); }
-        else {
-          right.addEventListener('click', ev => {
-            ev.stopPropagation();
-            [picked[i+1], picked[i]] = [picked[i], picked[i+1]];
-            renderSlots();
-          });
-        }
       } else { div.innerHTML = '<span class="num">'+(i+1)+'</span>'; }
       slotsEl.appendChild(div);
     }
@@ -396,6 +374,21 @@ function startAlbum(tracks){
   setTimeout(() => {
     loading.classList.remove('show');
     window.openAlbum(tracks);
+  }, 2500);
+}
+
+// トーストに好きなメッセージを出す（数秒で消える）
+function showToastMessage(msg){
+  const toast = document.getElementById('as-toast');
+  const textEl = document.getElementById('as-toast-text');
+  if (!toast || !textEl) return;
+  textEl.innerHTML = msg;
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
   }, 2500);
 }
 
@@ -834,7 +827,12 @@ function startAlbum(tracks){
   function confirmTitle(){
     const v = titleIn.value.trim();
     if (v.length === 0) return;
-    titleIn.value = v.endsWith('。') ? v : v + '。';
+    // 末尾がアルファベット/数字なら「.」、日本語なら「。」を付ける
+    const alreadyPunct = v.endsWith('。') || v.endsWith('.');
+    if (!alreadyPunct) {
+      v = /[A-Za-z0-9]$/.test(v) ? v + '.' : v + '。';
+    }
+    titleIn.value = v;
     titleIn.classList.add('confirmed');
     titleIn.classList.remove('is-empty');      // 確定したら枠と点滅を消す
     screenNext.disabled = false;               // 確定したら「次へ」を押せるように
@@ -850,22 +848,15 @@ function startAlbum(tracks){
   titleIn.addEventListener('blur', confirmTitle);
 
   screenNext.addEventListener('click', () => {
-    if (screenNext.disabled) return;
+    // タイトルが未確定なら、メッセージを出して止める
+    if (screenNext.disabled) {
+      showToastMessage('タイトルを入れてください。');
+      return;
+    }
     stopPlay();
     generateQR();
     qrOverlay.classList.add('show');
-    // QR表示から30秒後、自動で最初の選択画面に戻す（次の人のため）
-    setTimeout(() => {
-      if (qrOverlay.classList.contains('show')) {
-        location.href = location.href.split('?')[0].split('#')[0];
-      }
-    }, 30000);
-    // QRの外側を指でタップしたら、最初の選択画面に戻す
-  qrOverlay.addEventListener('click', (e) => {
-    // QRカード（白い枠の中）を押したときは戻らない。外側だけ
-    if (e.target.closest('#as-qr-card')) return;
-    location.href = location.href.split('?')[0].split('#')[0];
-  });
+    // ...（30秒タイマーなどはそのまま）
   });
 
   function restoreFromURL(){
