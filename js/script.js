@@ -591,7 +591,8 @@ function showToastMessage(msg){
   function highlight(){
     tlEl.querySelectorAll('.as-track').forEach((row,n)=>row.classList.toggle('playing', n===cur));
   }
-  function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updatePlayer(); highlight(); startPlay(); }
+  // 2. selectTrack内
+function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch(); updatePlayer(); highlight(); startPlay(); }
 
   window.openAlbum = function(selectedTracks){
     tracks = selectedTracks;
@@ -602,6 +603,7 @@ function showToastMessage(msg){
     buildTracklist();
     cur = 0; prog = 0; playing = false; running = false;
     loadTrack();
+    updateSwatch();  
     updatePlayer(); highlight();
     updateTitleEditable();
     reflectTitleState();
@@ -697,11 +699,12 @@ function showToastMessage(msg){
 
   function updatePlayer(){
     const t = tracks[cur];
-    swatch.innerHTML = '<img src="'+t.src+'" alt="">';
+    // swatch.innerHTML の行はここから削除
+  
     nameEl.textContent = t.name;
     numEl.textContent = 'トラック ' + (cur+1) + ' / ' + tracks.length;
     descEl.textContent = t.desc || '';
-
+  
     const total = (asAudio.duration && isFinite(asAudio.duration)) ? asAudio.duration
                 : (t.realDur || t.dur);
     const cur_s = prog * total;
@@ -710,10 +713,16 @@ function showToastMessage(msg){
     const mm=Math.floor(total/60), ss=String(Math.floor(total%60)).padStart(2,'0');
     const cm=Math.floor(cur_s/60), cs=String(Math.floor(cur_s%60)).padStart(2,'0');
     timeEl.textContent = cm+':'+cs+' / '+mm+':'+ss;
-
+  
     targetSpeed = 0.5 + (t.param.strength || 0.4) * 2.0;
     targetRibbonSpeed = 0.012 + (t.param.strength || 0.4) * 0.045;
     targetRibbonScale = 0.6 + (t.param.uneri || 0.5) * 1.1;
+  }
+  
+  // 新設：曲が切り替わった時だけサムネイルを更新する関数
+  function updateSwatch(){
+    const t = tracks[cur];
+    swatch.innerHTML = '<img src="'+t.src+'" alt="">';
   }
 
   function updateTitleEditable(){
@@ -761,17 +770,20 @@ function showToastMessage(msg){
   asAudio.addEventListener('timeupdate', () => {
     if (!playing || !asAudio.duration) return;
     prog = asAudio.currentTime / asAudio.duration;
+
+  asAudio.addEventListener('ended', () => {
+      if (cur < tracks.length - 1) { cur++; prog = 0; loadTrack(); updateSwatch(); updatePlayer(); highlight(); startPlay(); }
+      else { prog = 1; stopPlay(); updatePlayer(); }
+    });
     updatePlayer();
   });
-  asAudio.addEventListener('ended', () => {
-    if (cur < tracks.length - 1) { cur++; prog = 0; loadTrack(); updatePlayer(); highlight(); startPlay(); }
-    else { prog = 1; stopPlay(); updatePlayer(); }
-  });
+  
   asAudio.addEventListener('loadedmetadata', () => { updatePlayer(); });
+  prevEl.addEventListener('click', ()=>{ if(cur>0){ stopPlay(); cur--; prog=0; loadTrack(); updateSwatch(); updatePlayer(); highlight(); startPlay(); } });
+  nextEl.addEventListener('click', ()=>{ if(cur<tracks.length-1){ stopPlay(); cur++; prog=0; loadTrack(); updateSwatch(); updatePlayer(); highlight(); startPlay(); } });
 
   playEl.addEventListener('click', ()=> playing?stopPlay():startPlay());
-  prevEl.addEventListener('click', ()=>{ if(cur>0){ stopPlay(); cur--; prog=0; loadTrack(); updatePlayer(); highlight(); startPlay(); } });
-  nextEl.addEventListener('click', ()=>{ if(cur<tracks.length-1){ stopPlay(); cur++; prog=0; loadTrack(); updatePlayer(); highlight(); startPlay(); } });
+  
 
   // ---- 音量ダイヤル ----
   (function(){
