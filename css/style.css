@@ -1108,6 +1108,7 @@ body {
   line-height: 2;
   text-align: center;
   text-shadow: 0 1px 4px rgba(74, 73, 73, 0.45);
+  font-weight: 300;
 }
 
 /* ===== QR完成オーバーレイのタイトル ===== */
@@ -1329,6 +1330,7 @@ body {
   line-height: 2;
   text-align: center;
   text-shadow: 0 1px 4px rgba(74, 73, 73, 0.45);
+  font-weight: 300;
 }
 
 /* 完成画面が表示されたら、トーストを自動で「フワッと出て消える」 */
