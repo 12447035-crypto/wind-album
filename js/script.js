@@ -825,7 +825,7 @@ function showToastMessage(msg){
   titleIn.addEventListener('input', reflectTitleState);
 
   function confirmTitle(){
-    const v = titleIn.value.trim();
+    let v = titleIn.value.trim();
     if (v.length === 0) return;
     // 末尾がアルファベット/数字なら「.」、日本語なら「。」を付ける
     const alreadyPunct = v.endsWith('。') || v.endsWith('.');
@@ -858,6 +858,21 @@ function showToastMessage(msg){
     qrOverlay.classList.add('show');
     // ...（30秒タイマーなどはそのまま）
   });
+
+  // トーストに好きなメッセージを出す（数秒で消える）
+  function showToastMessage(msg){
+    const toast = document.getElementById('as-toast');
+    const textEl = document.getElementById('as-toast-text');
+    if (!toast || !textEl) return;
+    textEl.innerHTML = msg;
+    toast.classList.remove('hide');
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+      toast.classList.remove('show');
+      toast.classList.add('hide');
+    }, 2500);
+  }
 
   function restoreFromURL(){
     const m = location.search.match(/[?&]album=([^&]+)/);
