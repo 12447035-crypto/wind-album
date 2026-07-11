@@ -1330,6 +1330,8 @@ body {
   /* 最初は隠れていて、完成画面が出たとき下のアニメで表示→消える */
 }
 #as-toast-text {
+  display: inline-block;
+  margin-right: -0.7em;
   font-size: 14px;
   color: #727171; 
   letter-spacing: 0.08em;
