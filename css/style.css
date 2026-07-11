@@ -80,7 +80,7 @@ body {
 /* ===== 見出し ===== */
 #cf-maketitle {
   text-align: center;
-  padding-top: 50px;
+  padding-top: 70px;
   font-size: 17.5px;
   color: #000;
   margin: 0 0 16px;
@@ -92,6 +92,7 @@ body {
   font-size: 12.5px;
   color: #888;
   margin-top: 12px;
+  margin-bottom: 30px;
   line-height: 1.8;
 }
 
