@@ -54,7 +54,7 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   const cards = Array.from(stage.querySelectorAll('img'));
 
   // カードの横の間隔（layout()のxと、タップ判定のcardXで共通に使う）
-  const CARD_GAP = 122;
+  const CARD_GAP = 114;
 
   let current = 0, target = 0, wheelLock = false;
   const MAX = 5; let picked = [];
