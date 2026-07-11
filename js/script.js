@@ -844,7 +844,7 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
     const baseUrl = location.href.split('?')[0].split('#')[0];
     const url = baseUrl + '?album=' + param;
     qrEl.innerHTML = '';
-    new QRCode(qrEl, { text: url, width:280, height:280, colorDark:'#1d1d1f', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    new QRCode(qrEl, { text: url, width:280, height:280, colorDark:'#727171', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
   }
 
   function reflectTitleState(){

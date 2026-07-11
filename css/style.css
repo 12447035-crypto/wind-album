@@ -1114,12 +1114,13 @@ body {
   font-weight: 300;
 }
 
-/* ===== QR完成オーバーレイのタイトル ===== */
 #as-qr-title {
   font-size: 16px;
-  color: #3a4250;
+  color: #727171;
+  font-weight: 300;
   letter-spacing: 0.12em;
   text-align: center;
+  text-shadow: 0 1px 4px rgba(74, 73, 73, 0.45);
 }
 
 /* ===== 中央の再生ボタン：再生中は押し込まれたまま ===== */
