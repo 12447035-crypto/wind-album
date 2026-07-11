@@ -630,10 +630,10 @@ function showToastMessage(msg){
 
   qrOverlay.addEventListener('click', (e) => {
     if (e.target === qrOverlay) {
-      window.__fromQR = false;
-      closeAlbum();
+      // クエリパラメータ(?album=...)を外した状態で完全リロード → 完全に初期状態に戻る
+      location.href = location.origin + location.pathname;
     }
-  })
+  });
 
    // 戻る操作。QRから来た場合は選択画面に戻さない（完成画面のまま固定）
    window.addEventListener('popstate', () => {
