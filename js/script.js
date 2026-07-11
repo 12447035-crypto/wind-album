@@ -860,7 +860,7 @@ function showToastMessage(msg){
     qrOverlay.classList.add('show');
     // ...（30秒タイマーなどはそのまま）
   });
-
+  
   // トーストに好きなメッセージを出す（数秒で消える）
   function showToastMessage(msg){
     const toast = document.getElementById('as-toast');
