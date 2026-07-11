@@ -780,13 +780,15 @@ function showToastMessage(msg){
     if (!dial) return;
     let vol = curVol;
     const MIN = -135, MAX = 135;
+    let angle = MIN + (MAX - MIN) * vol; // 現在の角度をvolと同期して保持
+  
     function render(){
       const deg = MIN + (MAX - MIN) * vol;
       mark.style.transform = `translateX(-50%) rotate(${deg}deg)`;
       applyVolume(vol);
     }
     render();
-
+  
     let dragging = false;
     function getXY(e){
       if (e.touches && e.touches.length)        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -797,10 +799,16 @@ function showToastMessage(msg){
       const { x, y } = getXY(e);
       const rect = dial.getBoundingClientRect();
       const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
-      let ang = Math.atan2(y - cy, x - cx) * 180/Math.PI + 90;
-      if (ang > 180) ang -= 360;
-      ang = Math.max(MIN, Math.min(MAX, ang));
-      vol = (ang - MIN) / (MAX - MIN);
+      let raw = Math.atan2(y - cy, x - cx) * 180/Math.PI + 90;
+      if (raw > 180) raw -= 360;
+  
+      // 直前の角度からの差分を最短経路(-180〜180)に正規化して連続的に追従させる
+      let diff = raw - angle;
+      if (diff > 180) diff -= 360;
+      if (diff < -180) diff += 360;
+  
+      angle = Math.max(MIN, Math.min(MAX, angle + diff));
+      vol = (angle - MIN) / (MAX - MIN);
       render();
     }
     dial.addEventListener('mousedown', e => { dragging = true; setFromEvent(e); e.preventDefault(); });
@@ -810,7 +818,12 @@ function showToastMessage(msg){
     window.addEventListener('touchmove', e => { if (dragging) { setFromEvent(e); e.preventDefault(); } }, { passive:false });
     window.addEventListener('touchend', () => { dragging = false; });
     window.addEventListener('touchcancel', () => { dragging = false; });
-    dial.addEventListener('wheel', e => { e.preventDefault(); vol = Math.max(0, Math.min(1, vol + (e.deltaY < 0 ? 0.05 : -0.05))); render(); }, { passive:false });
+    dial.addEventListener('wheel', e => {
+      e.preventDefault();
+      vol = Math.max(0, Math.min(1, vol + (e.deltaY < 0 ? 0.05 : -0.05)));
+      angle = MIN + (MAX - MIN) * vol; // ホイール操作後もangleを同期
+      render();
+    }, { passive:false });
   })();
 
   function generateQR(){
