@@ -1021,10 +1021,6 @@ body {
   cursor: not-allowed;
 }
 
-#as-screen-next.locked {
-  cursor: not-allowed;
-}
-
 
 /* ===== 次へボタン：細い枠線の円 ===== */
 #as-screen-next .next-ring {
@@ -1051,7 +1047,7 @@ body {
   transition: stroke 0.25s ease;
 }
 
-#as-screen-next:disabled.has-text .next-ring {
+#as-screen-next.locked.has-text .next-ring {
   animation: nextBlinkGray 1.1s ease-in-out infinite;
 }
 @keyframes nextBlinkGray {
@@ -1059,7 +1055,7 @@ body {
   50%      { opacity: 0.4; }
 }
 
-#as-screen-next:not(:disabled) .next-ring {
+#as-screen-next:not(.locked) .next-ring {
   border-color: #2a8ad0;
   animation: nextBlinkBlue 1.2s ease-in-out infinite;
 }
@@ -1067,22 +1063,22 @@ body {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.5; }
 }
-#as-screen-next:not(:disabled) svg .phone-body,
-#as-screen-next:not(:disabled) svg .phone-line,
-#as-screen-next:not(:disabled) svg .down-arrow {
+#as-screen-next:not(.locked) svg .phone-body,
+#as-screen-next:not(.locked) svg .phone-line,
+#as-screen-next:not(.locked) svg .down-arrow {
   stroke: #2a8ad0;
 }
 
-#as-screen-next:not(:disabled):active .next-ring {
+#as-screen-next:not(.locked):active .next-ring {
   background: rgba(42, 138, 208, 0.08);
 }
 
-#as-screen-next:not(:disabled):hover .next-ring {
+#as-screen-next:not(.locked):hover .next-ring {
   border-color: #1c6fa8;
 }
-#as-screen-next:not(:disabled):hover svg .phone-body,
-#as-screen-next:not(:disabled):hover svg .phone-line,
-#as-screen-next:not(:disabled):hover svg .down-arrow {
+#as-screen-next:not(.locked):hover svg .phone-body,
+#as-screen-next:not(.locked):hover svg .phone-line,
+#as-screen-next:not(.locked):hover svg .down-arrow {
   stroke: #1c6fa8;
 }
 
