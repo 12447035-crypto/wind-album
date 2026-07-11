@@ -818,8 +818,7 @@ function showToastMessage(msg){
   function reflectTitleState(){
     const filled = titleIn.value.trim().length > 0;
     titleIn.classList.toggle('is-empty', !filled);
-    screenNext.classList.remove('ready');
-    screenNext.classList.add('locked');
+    screenNext.disabled = true;
     screenNext.classList.toggle('has-text', filled);
     titleIn.classList.remove('confirmed');
   }
@@ -836,8 +835,7 @@ function showToastMessage(msg){
     titleIn.value = v;
     titleIn.classList.add('confirmed');
     titleIn.classList.remove('is-empty');      // 確定したら枠と点滅を消す
-    screenNext.classList.add('ready');
-    screenNext.classList.remove('locked');
+    screenNext.disabled = false;
     screenNext.classList.remove('has-text');   // グレー点滅を解除
     titleIn.blur();
     titleIn.classList.add('just-confirmed');
@@ -850,17 +848,12 @@ function showToastMessage(msg){
   titleIn.addEventListener('blur', confirmTitle);
 
   screenNext.addEventListener('click', () => {
-    // タイトルが未確定なら、メッセージを出して止める
-    if (screenNext.disabled) {
-      showToastMessage('タイトルを入れてください。');
-      return;
-    }
+    if (screenNext.disabled) return;
     stopPlay();
     generateQR();
     qrOverlay.classList.add('show');
-    // ...（30秒タイマーなどはそのまま）
   });
-  
+
   // トーストに好きなメッセージを出す（数秒で消える）
   function showToastMessage(msg){
     const toast = document.getElementById('as-toast');

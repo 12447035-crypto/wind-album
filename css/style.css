@@ -1313,15 +1313,6 @@ body {
   100% { opacity: 0; transform: translate(-50%, -58%); }   /* ゆっくりフワッと消える */
 }
 
-/* JSのshowToastMessageで表示するとき用 */
-#as-toast.show {
-  opacity: 1 !important;
-  pointer-events: auto;
-}
-#as-toast.hide {
-  opacity: 0 !important;
-}
-
 #cf-slots .slot .mv {
   position: absolute;
   top: 50%;
@@ -1351,7 +1342,3 @@ body {
   pointer-events: none;
 }
 
-/* 無効状態でもクリックは拾えるようにする（メッセージを出すため） */
-#as-screen-next:disabled {
-  pointer-events: auto;
-}
