@@ -1097,11 +1097,14 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
+  text-align: center;
 }
 #as-toast2.show {
   opacity: 1;
 }
 #as-toast2-text {
+  display: inline-block;
+  margin-right: -0.54em; 
   font-size: 14px;
   color: #727171;
   letter-spacing: 0.08em;
