@@ -818,7 +818,8 @@ function showToastMessage(msg){
   function reflectTitleState(){
     const filled = titleIn.value.trim().length > 0;
     titleIn.classList.toggle('is-empty', !filled);
-    screenNext.disabled = true;
+    screenNext.classList.remove('ready');
+    screenNext.classList.add('locked');
     screenNext.classList.toggle('has-text', filled);
     titleIn.classList.remove('confirmed');
   }
@@ -835,7 +836,8 @@ function showToastMessage(msg){
     titleIn.value = v;
     titleIn.classList.add('confirmed');
     titleIn.classList.remove('is-empty');      // 確定したら枠と点滅を消す
-    screenNext.disabled = false;               // 確定したら「次へ」を押せるように
+    screenNext.classList.add('ready');
+    screenNext.classList.remove('locked');
     screenNext.classList.remove('has-text');   // グレー点滅を解除
     titleIn.blur();
     titleIn.classList.add('just-confirmed');
