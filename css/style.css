@@ -385,7 +385,7 @@ body {
 
 #cf-slots .slot .rm {
   position: absolute;
-  top: 6px;
+  top: 1px;
   right: 3px;
   width: 25px;
   height: 25px;
@@ -404,6 +404,7 @@ body {
   justify-content: center;
   line-height: 1;
   padding: 0;
+  padding-top: 3px;
 }
 
 #cf-confirm {
