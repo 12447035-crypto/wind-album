@@ -194,7 +194,7 @@
     function openAlbum(rec){
       const data = { s: rec.s, seed: rec.seed, t: rec.t || '' };
       const param = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-      location.href = 'index.html?album=' + param;
+      location.href = 'index.html?album=' + param + '&view=1';   // ← &view=1 を追加
     }
 
     document.getElementById('btn-export').addEventListener('click', () => {

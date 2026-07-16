@@ -886,6 +886,7 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
   }
 
   function reflectTitleState(){
+    if (window.__viewOnly) return;
     const filled = titleIn.value.trim().length > 0;
     titleIn.classList.toggle('is-empty', !filled);
     screenNext.classList.add('locked');  
@@ -921,6 +922,7 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
 
   // 再生中にタイトルをクリックしたら、再生を止めて編集できるようにする
 document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
+  if (window.__viewOnly) return;   
   if (!playing) return; // 再生中でなければ何もしない(通常のクリックはtitleIn自身が処理する)
   const r = titleIn.getBoundingClientRect();
   if (e.clientX >= r.left && e.clientX <= r.right &&
@@ -965,6 +967,8 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
   function restoreFromURL(){
     const m = location.search.match(/[?&]album=([^&]+)/);
     if (!m) return;
+    // 閲覧専用モード（ギャラリーから開いた時）の判定
+    const viewOnly = /[?&]view=1/.test(location.search);
     try {
       const data = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
       const stage = document.getElementById('cf-stage');
@@ -974,13 +978,31 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
         const pm = getParam(name);
         return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
       });
-      // QRから来た印。以降、戻る操作でも選択画面に戻さない
       window.__fromQR = true;
-      // 選択画面を完全に消す（visibility:hiddenだと存在するので display:none に）
+      window.__viewOnly = viewOnly;   // 閲覧専用フラグ
       document.getElementById('wall').style.display = 'none';
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
+
+      // 閲覧専用モードなら、戻る・タイトル編集・QRを封じる
+      if (viewOnly) {
+        applyViewOnly();
+      }
     } catch(e){ console.warn('復元に失敗', e); }
+  }
+
+  // 閲覧専用モード：戻る/タイトル編集/QRを無効化して「完成画面の表示だけ」にする
+  function applyViewOnly(){
+    // 前の画面に戻るボタンを隠す
+    if (screenPrev) screenPrev.style.display = 'none';
+    // QR（次へ）ボタンを隠す
+    if (screenNext) screenNext.style.display = 'none';
+    // タイトルを編集不可に固定
+    if (titleIn) {
+      titleIn.readOnly = true;
+      titleIn.classList.remove('editable', 'is-empty');
+      titleIn.style.pointerEvents = 'none';
+    }
   }
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
 
