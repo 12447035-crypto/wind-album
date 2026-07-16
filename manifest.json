@@ -1,0 +1,15 @@
+{
+    "name": "風のオムニバスアルバム",
+    "short_name": "風アルバム",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f2f1ee",
+    "theme_color": "#f2f1ee",
+    "icons": [
+      {
+        "src": "img/wall.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }

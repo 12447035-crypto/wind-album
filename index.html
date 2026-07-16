@@ -207,6 +207,19 @@
   </div>
 
   <script src="js/script.js"></script>
+  
+  <!-- PWA: manifestとService Workerの登録 -->
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker 登録成功'))
+        .catch((e) => console.warn('Service Worker 登録失敗', e));
+    });
+  }
+</script>
+
  </body>
 
 </html>
