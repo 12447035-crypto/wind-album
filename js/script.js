@@ -964,11 +964,11 @@ window.addEventListener('load', () => {
   const SVGNS = 'http://www.w3.org/2000/svg';
 
   const W = 240, H = 120;
-  const DOTS = 46;                 // 1本あたりのドット数
+  const DOTS = 100;                 // 1本あたりのドット数
   const ribbons = [
-    { yBase: 60, amp: 16, phase: 0.0, rMax: 1.5 },
-    { yBase: 60, amp: 22, phase: 1.1, rMax: 1.3 },
-    { yBase: 60, amp: 12, phase: 2.2, rMax: 1.6 },
+    { yBase: 60, amp: 30, phase: 0.0, rMax: 1.5 },
+    { yBase: 60, amp: 39, phase: 1.1, rMax: 1.3 },
+    { yBase: 60, amp: 42, phase: 2.2, rMax: 1.6 },
   ];
 
   // 各リボンのドットを生成
