@@ -966,9 +966,9 @@ window.addEventListener('load', () => {
   const W = 240, H = 120;
   const DOTS = 100;                 // 1本あたりのドット数
   const ribbons = [
-    { yBase: 60, amp: 30, phase: 0.0, rMax: 1.5 },
-    { yBase: 60, amp: 39, phase: 1.1, rMax: 1.3 },
-    { yBase: 60, amp: 42, phase: 2.2, rMax: 1.6 },
+    { yBase: 60, amp: 30, phase: 0.0, rMax: 1.0 },
+    { yBase: 60, amp: 39, phase: 1.1, rMax: 0.6 },
+    { yBase: 60, amp: 42, phase: 2.2, rMax: 0.8 },
   ];
 
   // 各リボンのドットを生成
@@ -985,7 +985,7 @@ window.addEventListener('load', () => {
 
   let t = 0;
   function frame(){
-    t += 0.03;
+    t += 0.006;
     ribbons.forEach((rb, ri) => {
       for (let i = 0; i < DOTS; i++){
         const f = i / (DOTS - 1);            // 0(左)～1(右)
