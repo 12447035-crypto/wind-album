@@ -608,12 +608,50 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
     updateTitleEditable();
     reflectTitleState();
     generateQR();
+    saveToGallery(); 
 
     // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
     history.pushState({ album: true }, '');
 
   };
+
+  // ===== ギャラリー保存（iPad内のlocalStorageに貯める）=====
+  function saveToGallery(){
+    // QRから復元して開いた場合は保存しない（二重保存を防ぐ）
+    if (window.__fromQR) return;
+    try {
+      const record = {
+        s: tracks.map(t => t.name),   // 選んだ曲名（順番も保持）
+        seed: seed,
+        t: titleIn.value || '',       // タイトル（この時点では空のことが多い）
+        date: Date.now()              // 作成日時
+      };
+      const key = 'windAlbums';
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      record.id = Date.now() + '_' + Math.floor(Math.random()*10000); // 一意のID
+      list.push(record);
+      localStorage.setItem(key, JSON.stringify(list));
+      window.__currentAlbumId = record.id;  // 後でタイトル確定時に更新するため覚えておく
+    } catch(e){ console.warn('ギャラリー保存に失敗', e); }
+  }
+
+  // ===== ギャラリー：保存済みレコードのタイトルを後から更新 =====
+  function updateGalleryTitle(title){
+    if (window.__fromQR) return;            // QR復元時は更新しない
+    if (!window.__currentAlbumId) return;   // 対象IDがなければ何もしない
+    try {
+      const key = 'windAlbums';
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      const rec = list.find(r => r.id === window.__currentAlbumId);
+      if (rec) {
+        rec.t = title;
+        localStorage.setItem(key, JSON.stringify(list));
+      }
+    } catch(e){ console.warn('タイトル更新に失敗', e); }
+  }
+
+  
 
   function closeAlbum(){
     stopPlay();
@@ -872,6 +910,8 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
     titleIn.blur();
     titleIn.classList.add('just-confirmed');
     setTimeout(() => titleIn.classList.remove('just-confirmed'), 600);
+
+    updateGalleryTitle(v); 
   }
   titleIn.addEventListener('keydown', e => {
     if (e.isComposing || e.keyCode === 229) return;
@@ -985,7 +1025,7 @@ window.addEventListener('load', () => {
 
   let t = 0;
   function frame(){
-    t += 0.006;
+    t += 0.01;
     ribbons.forEach((rb, ri) => {
       for (let i = 0; i < DOTS; i++){
         const f = i / (DOTS - 1);            // 0(左)～1(右)

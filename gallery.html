@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>アルバム記録一覧</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:"Hiragino Maru Gothic ProN","IBM Plex Sans JP",sans-serif; }
+    body { background:#f2f1ee; color:#5a5a56; padding:24px; line-height:1.6; }
+    h1 { font-size:18px; font-weight:500; letter-spacing:0.1em; margin-bottom:4px; }
+    .count { font-size:12px; color:#999; margin-bottom:20px; }
+    .toolbar { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; }
+    .toolbar button { font-size:12px; padding:8px 16px; border:1px solid #b6bcc4; border-radius:20px; background:#fff; color:#5a6472; cursor:pointer; }
+    .toolbar button:hover { border-color:#2a8ad0; color:#2a8ad0; }
+    .toolbar button.danger:hover { border-color:#d05a5a; color:#d05a5a; }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px; }
+    .card { background:#fff; border-radius:14px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,0.06); cursor:pointer; transition:transform 0.12s, box-shadow 0.12s; }
+    .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.1); }
+    .disc-wrap { position:relative; width:100%; aspect-ratio:1/1; margin-bottom:12px; display:flex; align-items:center; justify-content:center; }
+    .disc-wrap canvas { border-radius:50%; box-shadow:0 2px 10px rgba(0,0,0,0.12); display:block; }
+    .disc-hole { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:22%; height:22%; border-radius:50%; background:#fff; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06); }
+    .disc-hole::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:30%; height:30%; border-radius:50%; background:#bbb; }
+    .card .title { font-size:14px; font-weight:500; color:#3a4250; margin-bottom:5px; word-break:break-word; }
+    .card .title.empty { color:#bbb; font-weight:400; }
+    .card .songs { font-size:11px; color:#6a7280; margin-bottom:8px; line-height:1.5; }
+    .card .date { font-size:10px; color:#aaa; letter-spacing:0.04em; }
+    .empty-msg { color:#999; font-size:13px; padding:40px 0; text-align:center; }
+
+    .pager { display:flex; align-items:center; justify-content:center; gap:18px; margin-top:28px; }
+    .pager button { font-size:13px; padding:8px 20px; border:1px solid #b6bcc4; border-radius:20px; background:#fff; color:#5a6472; cursor:pointer; }
+    .pager button:disabled { opacity:0.4; cursor:not-allowed; }
+    .pager .pageinfo { font-size:12px; color:#888; }
+  </style>
+</head>
+<body>
+  <h1>アルバム記録一覧</h1>
+  <div class="count" id="count"></div>
+
+  <div class="toolbar">
+    <button id="btn-export">データを書き出す（バックアップ）</button>
+    <button id="btn-reload">再読み込み</button>
+    <button id="btn-clear" class="danger">全データを削除</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="pager" id="pager"></div>
+
+  <script>
+    const KEY = 'windAlbums';
+    const PER_PAGE = 20;
+    let curPage = 0;
+
+    // ==== index.html の WIND_PARAMS の色情報だけを最小限コピー（CD描画用）====
+    const WP = {
+      '北風':{h:212,sat:40},'山風':{h:135,sat:48},'海風':{h:198,sat:60},'川風':{h:190,sat:54},'潮風':{h:186,sat:64},
+      '向かい風':{h:230,sat:44},'追い風':{h:155,sat:52},'熱風':{h:18,sat:82},'野風':{h:95,sat:65},'清風':{h:200,sat:40},
+      'そよ風':{h:150,sat:35},'ビル風':{h:235,sat:30},'雨風':{h:208,sat:55},'朝風':{h:45,sat:55},'夕風':{h:24,sat:70},
+      '夜風':{h:250,sat:55},'春風':{h:330,sat:48},'花風':{h:340,sat:58},'春一番':{h:50,sat:78},'木の芽風':{h:80,sat:55},
+      '青嵐':{h:148,sat:72},'若葉風':{h:105,sat:62},'黒南風':{h:218,sat:35},'涼風':{h:182,sat:55},'初嵐':{h:32,sat:68},
+      '秋風':{h:35,sat:62},'悲風':{h:262,sat:50},'寒風':{h:215,sat:38},'木枯らし':{h:206,sat:40},'隙間風':{h:225,sat:28}
+    };
+    function paramOf(name){ return WP[name] || {h:200,sat:45}; }
+
+    function load(){ try { return JSON.parse(localStorage.getItem(KEY)||'[]'); } catch(e){ return []; } }
+    function fmtDate(ts){ if(!ts) return ''; const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function render(){
+      const all = load().slice().sort((a,b)=>(b.date||0)-(a.date||0));
+      const totalPages = Math.max(1, Math.ceil(all.length / PER_PAGE));
+      if (curPage >= totalPages) curPage = totalPages - 1;
+      if (curPage < 0) curPage = 0;
+
+      document.getElementById('count').textContent = '合計 ' + all.length + ' 件';
+
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      if (all.length === 0){
+        grid.innerHTML = '<div class="empty-msg">まだ記録がありません。</div>';
+        document.getElementById('pager').innerHTML = '';
+        return;
+      }
+
+      const pageItems = all.slice(curPage*PER_PAGE, curPage*PER_PAGE + PER_PAGE);
+
+      pageItems.forEach(rec => {
+        const title = (rec.t && rec.t.trim()) ? rec.t : '（無題）';
+        const titleClass = (rec.t && rec.t.trim()) ? 'title' : 'title empty';
+        const songs = (rec.s || []).join('、');
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML =
+          '<div class="disc-wrap"><div class="disc-hole"></div></div>' +
+          '<div class="' + titleClass + '">' + escapeHtml(title) + '</div>' +
+          '<div class="songs">' + escapeHtml(songs) + '</div>' +
+          '<div class="date">' + fmtDate(rec.date) + '</div>';
+        card.addEventListener('click', () => openAlbum(rec));
+        grid.appendChild(card);
+
+        // CD静止画を描く（1枚1回だけ）
+        drawDisc(card.querySelector('.disc-wrap'), rec);
+      });
+
+      renderPager(totalPages);
+    }
+
+    function renderPager(totalPages){
+      const pager = document.getElementById('pager');
+      pager.innerHTML = '';
+      if (totalPages <= 1) return;
+      const prev = document.createElement('button');
+      prev.textContent = '← 前へ';
+      prev.disabled = (curPage === 0);
+      prev.addEventListener('click', () => { curPage--; render(); window.scrollTo(0,0); });
+
+      const info = document.createElement('div');
+      info.className = 'pageinfo';
+      info.textContent = (curPage+1) + ' / ' + totalPages + ' ページ';
+
+      const next = document.createElement('button');
+      next.textContent = '次へ →';
+      next.disabled = (curPage >= totalPages-1);
+      next.addEventListener('click', () => { curPage++; render(); window.scrollTo(0,0); });
+
+      pager.appendChild(prev); pager.appendChild(info); pager.appendChild(next);
+    }
+
+    // ==== CD静止画描画（p5.jsインスタンスを1枚ごとに作り、描いたら止める）====
+    function drawDisc(wrapEl, rec){
+      const size = 160; // 描画解像度
+      const names = rec.s || [];
+      const seedBase = names.reduce((s,n,i)=> s + n.length*(i+1)*131, 7);
+      const ws = names.map(paramOf);
+      const baseHue = ws[0] ? ws[0].h : 200;
+      const subHue  = ws[1] ? ws[1].h : 210;
+      // 最も彩度の高い風をリボン色に
+      const ribbon = ws.reduce((a,b)=> b.sat>a.sat?b:a, ws[0]||{h:200,sat:45});
+      const pearl  = ws[2] || ws[0] || {h:200,sat:45};
+
+      new p5((p) => {
+        p.setup = () => {
+          const c = p.createCanvas(size, size);
+          c.parent(wrapEl);
+          // canvasをholeより後ろに（holeは絶対配置で上）
+          c.elt.style.position = 'relative';
+          c.elt.style.zIndex = '0';
+          p.colorMode(p.HSL,360,100,100,1);
+          p.pixelDensity(1);
+          p.randomSeed(seedBase); p.noiseSeed(seedBase);
+          drawStill(p);
+          p.noLoop(); // 1回描いて停止（軽量化の要）
+        };
+      });
+
+      function drawStill(p){
+        const SZ = size;
+        // グラデーション背景
+        p.noStroke();
+        for (let y=0;y<SZ;y++){ const t=y/SZ; const h=p.lerp(baseHue,subHue,t); p.fill(h,p.lerp(16,20,t),p.lerp(94,89,t)); p.rect(0,y,SZ,1); }
+        // ハーフトーン風のドット
+        const spacing=Math.max(6,SZ/26), maxR=spacing*0.42;
+        for(let y=spacing/2;y<SZ;y+=spacing)for(let x=spacing/2;x<SZ;x+=spacing){
+          let f=(p.noise(x*0.03,y*0.03)-0.5)*2.4 + p.sin(x*0.05+y*0.03)*0.5;
+          const tt=p.constrain(p.map(f,-1.8,1.8,0,1),0,1), r=tt*maxR;
+          if(r>0.4){ p.fill(pearl.h,30,82,0.8); p.noStroke(); p.circle(x,y,r*2); }
+        }
+        // リボン（静止）
+        const hue=ribbon.h, sat=Math.min(95,ribbon.sat+25), lum=55;
+        for(let rb=0; rb<3; rb++){
+          const amp=SZ*(0.06+rb*0.02), phase=rb*1.3;
+          for(let i=0;i<12;i++){
+            const offY=p.map(i,0,11,-SZ*0.12,SZ*0.12);
+            p.noFill(); p.stroke(hue,sat,lum,0.5*(0.5+0.5*(1-Math.abs(i-6)/6))); p.strokeWeight(0.5);
+            p.beginShape();
+            for(let x=-20;x<=SZ+20;x+=6){ const t=x*0.02;
+              const wave=p.sin(t*0.8+phase)*amp + p.sin(t*2.1+1.2+phase)*amp*0.3;
+              p.curveVertex(x, SZ*0.5 + wave + offY);
+            }
+            p.endShape();
+          }
+        }
+        // 中央から外への同心円（CDっぽさ）
+        p.drawingContext.globalCompositeOperation='overlay';
+        for(let ri=1;ri<9;ri++){ p.noFill(); p.stroke(0,0,100,0.05); p.strokeWeight(1); p.circle(SZ/2,SZ/2,SZ*(ri/9)); }
+        p.drawingContext.globalCompositeOperation='source-over';
+      }
+    }
+
+    function openAlbum(rec){
+      const data = { s: rec.s, seed: rec.seed, t: rec.t || '' };
+      const param = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      location.href = 'index.html?album=' + param;
+    }
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const list = load();
+      const blob = new Blob([JSON.stringify(list,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const now=new Date(); const p=n=>String(n).padStart(2,'0');
+      a.href=url; a.download=`wind-albums-${now.getFullYear()}${p(now.getMonth()+1)}${p(now.getDate())}.json`;
+      a.click(); URL.revokeObjectURL(url);
+    });
+    document.getElementById('btn-reload').addEventListener('click', () => { render(); });
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('本当にすべての記録を削除しますか？この操作は取り消せません。')) { localStorage.removeItem(KEY); curPage=0; render(); }
+    });
+
+    render();
+  </script>
+</body>
+</html>
