@@ -957,3 +957,60 @@ window.addEventListener('load', () => {
   }
 });
 
+// ===== ロード画面：風のドットリボン アニメーション =====
+(function(){
+  const svg = document.getElementById('al-svg');
+  if (!svg) return;
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  const W = 240, H = 120;
+  const DOTS = 46;                 // 1本あたりのドット数
+  const ribbons = [
+    { yBase: 60, amp: 16, phase: 0.0, rMax: 1.5 },
+    { yBase: 60, amp: 22, phase: 1.1, rMax: 1.3 },
+    { yBase: 60, amp: 12, phase: 2.2, rMax: 1.6 },
+  ];
+
+  // 各リボンのドットを生成
+  const dotEls = ribbons.map(rb => {
+    const arr = [];
+    for (let i = 0; i < DOTS; i++){
+      const c = document.createElementNS(SVGNS, 'circle');
+      c.setAttribute('class', 'al-dot');
+      svg.appendChild(c);
+      arr.push(c);
+    }
+    return arr;
+  });
+
+  let t = 0;
+  function frame(){
+    t += 0.03;
+    ribbons.forEach((rb, ri) => {
+      for (let i = 0; i < DOTS; i++){
+        const f = i / (DOTS - 1);            // 0(左)～1(右)
+        const x = 20 + f * (W - 40);         // 左20〜右220
+        // 左は密・右は疎に見せるため、右ほど「間引いて」表示（透明度で調整）
+        const density = 1 - f;               // 左1→右0
+        // 波（風のうねり）。右にいくほど波が大きく開くように amp を増やす
+        const wave = Math.sin(f * 6 - t * 1.6 + rb.phase) * rb.amp * (0.4 + f * 0.9);
+        const y = rb.yBase + wave;
+        // ドットの大きさ：右にいくほど少しだけ大きく（ばらけて見える）
+        const r = rb.rMax * (0.6 + f * 0.8);
+        // 透明度：左は濃く（密で線に見える）、右は薄くバラつかせる
+        // 右側は間隔をあけたいので、1つおきに近い感覚で薄くする
+        let op = 0.15 + density * 0.85;
+        // 右側で「間引き」感を出す：奇数番目をさらに薄く（点が飛ぶ感じ）
+        if (f > 0.5 && i % 2 === 1) op *= 0.35;
+
+        const c = dotEls[ri][i];
+        c.setAttribute('cx', x.toFixed(2));
+        c.setAttribute('cy', y.toFixed(2));
+        c.setAttribute('r', r.toFixed(2));
+        c.setAttribute('opacity', op.toFixed(2));
+      }
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();

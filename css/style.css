@@ -447,7 +447,8 @@ body {
 }
 
 
-/* ===== ロード画面：風のリボンアニメーション ===== */
+
+/* ===== ロード画面：風のドットリボン ===== */
 .al-wind {
   width: 240px;
   height: 120px;
@@ -460,54 +461,8 @@ body {
   overflow: visible;
 }
 
-/* 各リボン：全体をゆるく上下に揺らして風になびかせる */
-.al-line {
-  transform-origin: center;
-  animation: alSway 3.2s ease-in-out infinite;
-}
-.al-line1 { animation-delay: 0s;    }
-.al-line2 { animation-delay: 0.35s; }
-.al-line3 { animation-delay: 0.7s;  }
-
-@keyframes alSway {
-  0%, 100% { transform: translateY(0)    rotate(0deg); }
-  25%      { transform: translateY(-3px) rotate(-1.2deg); }
-  50%      { transform: translateY(2px)  rotate(0.8deg); }
-  75%      { transform: translateY(-1px) rotate(-0.5deg); }
-}
-
-/* 線が「描かれては端から消えていく」流れ。dashで線を流す */
-.al-line {
-  stroke-dasharray: 60 240;
-  stroke-dashoffset: 300;
-  animation:
-    alSway 3.2s ease-in-out infinite,
-    alFlow 2.4s linear infinite;
-}
-.al-line1 { animation-delay: 0s,    0s;    }
-.al-line2 { animation-delay: 0.35s, 0.3s;  }
-.al-line3 { animation-delay: 0.7s,  0.6s;  }
-
-@keyframes alFlow {
-  0%   { stroke-dashoffset: 300; opacity: 0; }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { stroke-dashoffset: 0;   opacity: 0; }
-}
-
-/* 端のドット：ほどけて右へ流れながら消える */
 .al-dot {
-  animation: alDot 2.4s linear infinite;
-}
-.al-dot1 { animation-delay: 0s;   }
-.al-dot2 { animation-delay: 0.3s; }
-.al-dot3 { animation-delay: 0.6s; }
-
-@keyframes alDot {
-  0%   { transform: translate(0, 0);      opacity: 0; }
-  20%  { opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translate(14px, -4px); opacity: 0; }
+  fill: #5b9bd5;
 }
 
 .al-text {
