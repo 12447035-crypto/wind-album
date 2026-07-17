@@ -671,6 +671,11 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
   }
   
   screenPrev.addEventListener('click', () => {
+    // 閲覧専用モード（ギャラリーから開いた時）は、一覧ページに戻る
+    if (window.__viewOnly) {
+      location.href = 'gallery.html';
+      return;
+    }
     if (qrOverlay.classList.contains('show')) {
       qrOverlay.classList.remove('show');
     } else {
@@ -1003,19 +1008,22 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
     } catch(e){ console.warn('復元に失敗', e); }
   }
 
-  // 閲覧専用モード：戻る/タイトル編集/QRを無効化して「完成画面の表示だけ」にする
-  function applyViewOnly(){
-    // 前の画面に戻るボタンを隠す
-    if (screenPrev) screenPrev.style.display = 'none';
-    // QR（次へ）ボタンを隠す
-    if (screenNext) screenNext.style.display = 'none';
-    // タイトルを編集不可に固定
-    if (titleIn) {
-      titleIn.readOnly = true;
-      titleIn.classList.remove('editable', 'is-empty');
-      titleIn.style.pointerEvents = 'none';
-    }
+ // 閲覧専用モード：戻る/タイトル編集/QRを無効化して「完成画面の表示だけ」にする
+ function applyViewOnly(){
+  // 戻る矢印は消さず、「ギャラリー一覧へ戻る」ボタンとして使う
+  if (screenPrev) {
+    screenPrev.style.display = '';
+    screenPrev.setAttribute('aria-label', '一覧に戻る');
   }
+  // QR（次へ）ボタンを隠す
+  if (screenNext) screenNext.style.display = 'none';
+  // タイトルを編集不可に固定
+  if (titleIn) {
+    titleIn.readOnly = true;
+    titleIn.classList.remove('editable', 'is-empty');
+    titleIn.style.pointerEvents = 'none';
+  }
+}
   window.addEventListener('load', () => { setTimeout(restoreFromURL, 50); });
 
   // 画面回転・リサイズでスマホ⇔PC配置を切り替える
