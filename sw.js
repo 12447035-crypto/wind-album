@@ -62,16 +62,67 @@ self.addEventListener('activate', (event) => {
 
 // リクエスト時：まずキャッシュ、なければネットワーク
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((res) => {
-        // 新しく取得できたものはキャッシュに追加（フォントなど）
-        return caches.open(CACHE_NAME).then((cache) => {
-          try { cache.put(event.request, res.clone()); } catch(e){}
-          return res;
-        });
-      }).catch(() => cached);
-    })
-  );
-});
+    const req = event.request;
+  
+    // 音声ファイル（Rangeリクエスト対応が必要）
+    if (req.destination === 'audio' || /\.mp3$/i.test(req.url)) {
+      event.respondWith(handleAudioRequest(req));
+      return;
+    }
+  
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            try { cache.put(req, res.clone()); } catch(e){}
+            return res;
+          });
+        }).catch(() => cached);
+      })
+    );
+  });
+  
+  // 音声ファイル専用：Rangeリクエストにキャッシュから正しく応答する
+  async function handleAudioRequest(req){
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(req.url, { ignoreSearch: true });
+  
+    if (!cached) {
+      // キャッシュになければネットワークから取得を試みる
+      try { return await fetch(req); }
+      catch(e){ return new Response('', { status: 404 }); }
+    }
+  
+    const rangeHeader = req.headers.get('range');
+    const buffer = await cached.arrayBuffer();
+    const total = buffer.byteLength;
+  
+    if (!rangeHeader) {
+      // Rangeなしなら全体を返す
+      return new Response(buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'Content-Length': total,
+          'Accept-Ranges': 'bytes'
+        }
+      });
+    }
+  
+    // "bytes=開始-終了" を解析して、該当部分だけ切り出して返す
+    const match = /bytes=(\d+)-(\d*)/.exec(rangeHeader);
+    const start = match ? parseInt(match[1], 10) : 0;
+    const end = match && match[2] ? parseInt(match[2], 10) : total - 1;
+    const chunk = buffer.slice(start, end + 1);
+  
+    return new Response(chunk, {
+      status: 206,
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Content-Range': `bytes ${start}-${end}/${total}`,
+        'Content-Length': chunk.byteLength,
+        'Accept-Ranges': 'bytes'
+      }
+    });
+  }
