@@ -617,8 +617,8 @@ function selectTrack(n){ stopPlay(); cur=n; prog=0; loadTrack(); updateSwatch();
     updatePlayer(); highlight();
     updateTitleEditable();
     reflectTitleState();
-    generateQR();
     saveToGallery(); 
+    generateQR();
 
     // applyMobileLayout();   // スマホなら横一列レイアウトに並べ替え
     screen.classList.add('show');
