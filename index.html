@@ -7,6 +7,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
+<script>
+  // QRから来た（?album= が付いている）場合、最初から選択画面を出さない印を付ける
+  (function(){
+    if (/[?&]album=/.test(location.search)) {
+      document.documentElement.className += ' from-album';
+    }
+  })();
+</script>
   <link rel="stylesheet" href="css/style.css">
   <title>風のオムニバスアルバム</title>
   <script src="https://code.jquery.com/jquery-3.7.1.js"
@@ -207,7 +215,7 @@
   </div>
 
   <script src="js/script.js"></script>
-  
+
   <!-- PWA: manifestとService Workerの登録 -->
 <link rel="manifest" href="manifest.json">
 <script>

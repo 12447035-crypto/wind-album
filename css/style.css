@@ -15,6 +15,14 @@ body {
   overscroll-behavior-x: none;
 }
 
+/* QRから来た時（html.from-album）は、選択画面とローディングを最初から隠す */
+html.from-album #wall {
+  display: none !important;
+}
+html.from-album #album-loading {
+  display: none !important;
+}
+
 #wrapper {
   position: relative;
   width: 100%;

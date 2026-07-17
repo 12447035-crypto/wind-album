@@ -981,6 +981,7 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
       window.__fromQR = true;
       window.__viewOnly = viewOnly;   // 閲覧専用フラグ
       document.getElementById('wall').style.display = 'none';
+      document.getElementById('album-loading').style.display = 'none'; 
       window.openAlbum(restored);
       if (data.t) { titleIn.value = data.t; reflectTitleState(); }
 
