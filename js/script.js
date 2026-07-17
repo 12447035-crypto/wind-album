@@ -220,7 +220,7 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   function updateAddBtn(idx){
     const pos = picked.indexOf(idx);
     if (pos >= 0) { btnAdd.classList.add('added'); btnAdd.textContent = '✓ ' + (pos+1); }
-    else { btnAdd.classList.remove('added'); btnAdd.textContent = picked.length >= MAX ? 'full' : 'add'; }
+    else { btnAdd.classList.remove('added'); btnAdd.textContent = picked.length >= MAX ? '5つ選択済み' : 'この風を選ぶ'; }
     btnAdd.disabled = (pos < 0 && picked.length >= MAX);
   }
 
