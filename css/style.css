@@ -574,7 +574,8 @@ html.from-album #album-loading {
   background: none;
   border: none;
   outline: none;
-  font-family: "Klee One", cursive;
+  font-family: "IBM Plex Sans JP", sans-serif;
+  font-weight: 300;
   font-size: clamp(11.2px, 2.2vw, 19.6px);
   color: #ffffff;
   letter-spacing: 0.28em;
