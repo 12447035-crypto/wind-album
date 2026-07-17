@@ -1088,3 +1088,31 @@ window.addEventListener('load', () => {
   }
   frame();
 })();
+
+// ===== 無操作タイマー：1分間何も操作がなければトップに戻る =====
+(function(){
+  const IDLE_MS = 180 * 1000;   // 1分（ミリ秒）
+  let idleTimer = null;
+
+  function goHome(){
+    // QRから来た閲覧ページは対象外（勝手に戻さない）
+    if (window.__fromQR || window.__viewOnly) return;
+    // パラメータなしのトップに戻る（＝完全リセット）
+    location.href = location.origin + location.pathname;
+  }
+
+  function resetIdle(){
+    // QRから来た閲覧ページではタイマー自体を動かさない
+    if (window.__fromQR || window.__viewOnly) return;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(goHome, IDLE_MS);
+  }
+
+  // ユーザー操作とみなすイベント。どれかがあればタイマーをリセット
+  ['click','touchstart','touchmove','keydown','mousemove','wheel'].forEach(ev => {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // ページ読み込み時にタイマー開始
+  resetIdle();
+})();
