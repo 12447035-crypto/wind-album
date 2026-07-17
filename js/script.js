@@ -1116,3 +1116,43 @@ window.addEventListener('load', () => {
   // ページ読み込み時にタイマー開始
   resetIdle();
 })();
+
+// ===== 隠し導線：左上の角を3秒以内に5回タップでギャラリーへ =====
+(function(){
+  // QRから来た閲覧ページでは無効化（来場者のページには絶対出さない）
+  if (window.__fromQR || window.__viewOnly) return;
+
+  const ZONE_SIZE = 80;      // 反応させる範囲（左上から何pxの正方形か）
+  const NEED_TAPS = 5;       // 必要なタップ回数
+  const WINDOW_MS = 3000;    // この時間内に規定回数タップする必要がある
+
+  let tapTimes = [];
+
+  function isInZone(x, y){
+    return x <= ZONE_SIZE && y <= ZONE_SIZE;
+  }
+
+  function handleTap(x, y){
+    if (!isInZone(x, y)) return;
+
+    const now = Date.now();
+    tapTimes.push(now);
+    // 3秒より前のタップは捨てる
+    tapTimes = tapTimes.filter(t => now - t <= WINDOW_MS);
+
+    if (tapTimes.length >= NEED_TAPS) {
+      tapTimes = [];
+      location.href = 'gallery.html';
+    }
+  }
+
+  // タップ（タッチ）とクリック（マウス）両対応
+  window.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    if (t) handleTap(t.clientX, t.clientY);
+  }, { passive: true });
+
+  window.addEventListener('click', (e) => {
+    handleTap(e.clientX, e.clientY);
+  });
+})();
