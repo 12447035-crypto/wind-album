@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wind-album-v3';
+const CACHE_NAME = 'wind-album-v4';
 
 // オフラインでも動くよう、キャッシュするファイル一覧
 const ASSETS = [
