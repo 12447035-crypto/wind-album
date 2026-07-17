@@ -53,6 +53,16 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
   const label = document.getElementById('cf-label');
   const cards = Array.from(stage.querySelectorAll('img'));
 
+   // QRから来た（?album=）時は選択画面を使わないので、30枚の画像を読み込まない。
+  // 通常アクセス時だけ data-src → src に移して読み込む。
+  const isFromAlbum = /[?&]album=/.test(location.search);
+  if (!isFromAlbum) {
+    cards.forEach(c => {
+      const ds = c.getAttribute('data-src');
+      if (ds) c.setAttribute('src', ds);
+    });
+  }
+
   // カードの横の間隔（layout()のxと、タップ判定のcardXで共通に使う）
   const CARD_GAP = 104;
 
@@ -976,7 +986,8 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
       const restored = data.s.map(name => {
         const card = cards.find(c => c.dataset.name === name);
         const pm = getParam(name);
-        return { name, src: card ? card.getAttribute('src') : '', param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };
+        const imgSrc = card ? (card.getAttribute('src') || card.getAttribute('data-src') || '') : '';
+       return { name, src: imgSrc, param: pm, dur: pm.dur, desc: pm.desc, audio: pm.audio || '' };    
       });
       window.__fromQR = true;
       window.__viewOnly = viewOnly;   // 閲覧専用フラグ
