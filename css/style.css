@@ -912,7 +912,6 @@ html.from-album #album-loading {
   justify-content: center;
   background: rgba(150, 155, 165, 0.55);
   backdrop-filter: blur(4px);
-  border-radius: 48px;
 }
 
 #as-qr-overlay.show {
