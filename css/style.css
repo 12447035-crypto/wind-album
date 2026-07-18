@@ -79,7 +79,7 @@ html.from-album #album-loading {
   z-index: 0;
   width: 100%;
   min-height: 100vh;
-  background-image: url('../img/wall.png');
+  background-image: url('../img/wall.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: repeat-y;
@@ -485,7 +485,7 @@ html.from-album #album-loading {
   inset: 0;
   z-index: 9999;
   display: none;
-  background-image: url('../img/wall.png');
+  background-image: url('../img/wall.jpg');
   background-size: cover;
   background-position: center;
   align-items: center;

@@ -980,6 +980,14 @@ document.getElementById('as-disc-wrap').addEventListener('click', (e) => {
       toast.classList.remove('show');
       toast.classList.add('hide');
     }, 2500);
+
+    // QR表示から30秒後、自動でトップに戻す（次の人のため）
+    if (qrTimer) clearTimeout(qrTimer);
+    qrTimer = setTimeout(() => {
+      if (qrOverlay.classList.contains('show')) {
+        location.href = location.origin + location.pathname;
+      }
+    }, 60 * 1000);
   }
 
   function restoreFromURL(){
@@ -1102,7 +1110,7 @@ window.addEventListener('load', () => {
 
 // ===== 無操作タイマー：1分間何も操作がなければトップに戻る =====
 (function(){
-  const IDLE_MS = 180 * 1000;   // 1分（ミリ秒）
+  const IDLE_MS = 5 * 60 * 1000;   // 1分（ミリ秒）
   let idleTimer = null;
 
   function goHome(){
