@@ -246,6 +246,9 @@ function getParam(name){ return WIND_PARAMS[name] || DEFAULT_PARAM; }
     cfAudio.play();
     previewing = true;
     playBtn.classList.add('playing');
+
+     // 再生開始時、選んだ5枠のスロットが見える位置まで自動スクロール
+  slotsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function stopPreview(){
     previewing = false;
