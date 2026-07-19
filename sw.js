@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wind-album-v80';   // 数字は今までの続きに合わせて調整してください
+const CACHE_NAME = 'wind-album-v90';   // 数字は今までの続きに合わせて調整してください
 
 const ASSETS = [
   './',
